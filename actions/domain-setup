@@ -14,7 +14,10 @@ openstack user show heat_domain_admin || {
     openstack user create --domain heat --password `leader-get heat-domain-admin-passwd` heat_domain_admin
 }
 
-openstack role add --domain heat --user heat_domain_admin admin || :
+openstack role add --domain heat --user-domain heat --user heat_domain_admin admin || {
+    # NOTE(jamespage): Fallback to trying older style --user-domain -less configuration
+    openstack role add --domain heat --user heat_domain_admin admin
+}
 
 openstack role show heat_stack_user || {
     openstack role create heat_stack_user
