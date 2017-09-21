@@ -17,6 +17,9 @@
 """
 Basic heat functional test.
 """
+import json
+import subprocess
+
 import amulet
 from heatclient.common import template_utils
 
@@ -69,7 +72,9 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
            and the rest of the service are from lp branches that are
            compatible with the local charm (e.g. stable or next).
            """
-        this_service = {'name': 'heat', 'constraints': {'mem': '2G'}}
+        this_service = {'name': 'heat',
+                        'constraints': {'mem': '2G'},
+                        'units': 2}
         other_services = [
             {'name': 'keystone'},
             {'name': 'rabbitmq-server'},
@@ -417,10 +422,7 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
         expected = {
             'private-address': u.valid_ip,
             'db_host': u.valid_ip,
-            'heat_allowed_units': '{}/{}'.format(
-                self.heat_sentry.info['service'],
-                self.heat_sentry.info['unit']
-            ),
+            'heat_allowed_units': u.not_null,
             'heat_password': u.not_null
         }
 
@@ -612,6 +614,52 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
         self._stack_delete()
         self._image_delete()
         self._keypair_delete()
+
+    def test_500_auth_encryption_key_same_on_units(self):
+        """Test that the auth_encryption_key in heat.conf is the same on all of
+        the units.
+        """
+        u.log.debug("Checking the 'auth_encryption_key' is the same on "
+                    "all units.")
+        output, ret = self._run_arbitrary(
+            "--application heat "
+            "--format json "
+            "grep auth_encryption_key /etc/heat/heat.conf")
+        if ret:
+            msg = "juju run returned error: ({}) -> {}".format(ret, output)
+            amulet.raise_status(amulet.FAIL, msg=msg)
+        output = json.loads(output)
+        keys = {}
+        for r in output:
+            k = r['Stdout'].split('=')[1].strip()
+            keys[r['UnitId']] = k
+        # see if keys are different.
+        ks = keys.values()
+        if any(((k != ks[0]) for k in ks[1:])):
+            msg = ("'auth_encryption_key' is not identical on every unit: {}"
+                   .format("{}={}".format(k, v) for k, v in keys.items()))
+            amulet.raise_status(amulet.FAIL, msg=msg)
+
+    @staticmethod
+    def _run_arbitrary(command, timeout=300):
+        """Run an arbitrary command (as root), but not necessarily on a unit.
+
+        (Otherwise the self.run(...) command could have been used for the unit
+
+        :param str command: The command to run.
+        :param int timeout: Seconds to wait before timing out.
+        :return: A 2-tuple containing the output of the command and the exit
+            code of the command.
+        """
+        cmd = ['juju', 'run', '--timeout', "{}s".format(timeout),
+               ] + command.split()
+        p = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+        output = stdout if p.returncode == 0 else stderr
+        return output.decode('utf8').strip(), p.returncode
 
     def test_900_heat_restart_on_config_change(self):
         """Verify that the specified services are restarted when the config
