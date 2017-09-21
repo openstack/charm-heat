@@ -21,7 +21,7 @@ required domains, roles and users in the cloud for Heat stacks.
 For juju 2.x deployments use:
 
     juju run-action heat/0 domain-setup
-    
+
 If using juju 1.x run:
 
     juju action do heat/0 domain-setup
@@ -89,10 +89,3 @@ alternatively these can also be provided as part of a juju native bundle configu
 NOTE: Spaces must be configured in the underlying provider prior to attempting to use them.
 
 NOTE: Existing deployments using os-*-network configuration options will continue to function; these options are preferred over any network space binding provided if set.
-
-Contact Information
-===================
-
-Author: Yolanda Robla <yolanda.robla@canonical.com>
-Report bugs at: http://bugs.launchpad.net/charms/+source/heat/+filebug
-Location: http://jujucharms.com/charms/heat
