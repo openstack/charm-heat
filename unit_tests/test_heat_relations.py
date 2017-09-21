@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os.path
 import sys
 
 from mock import call, patch, MagicMock
-from test_utils import CharmTestCase
+from test_utils import CharmTestCase, patch_open
 
 # python-apt is not installed as part of test-requirements but is imported by
 # some charmhelpers modules so create a fake import.
@@ -44,6 +45,9 @@ TO_PATCH = [
     # charmhelpers.core.hookenv
     'Hooks',
     'config',
+    'is_leader',
+    'leader_set',
+    'log',
     'open_port',
     'relation_set',
     'related_units',
@@ -122,6 +126,30 @@ class HeatRelationTests(CharmTestCase):
         relations.config_changed()
 
         self.assertFalse(self.do_openstack_upgrade.called)
+
+    @patch('os.path.isfile')
+    @patch('os.remove')
+    @patch.object(relations, 'leader_elected')
+    def test_upgrade_charm(self, leader_elected, os_remove, os_path_isfile):
+        os_path_isfile.return_value = False
+        self.is_leader.return_value = False
+        relations.upgrade_charm()
+        leader_elected.assert_called_once_with()
+        os_path_isfile.assert_not_called()
+        # now say we are the leader
+        self.is_leader.return_value = True
+        os_path_isfile.return_value = False
+        relations.upgrade_charm()
+        self.leader_set.assert_not_called()
+        os_path_isfile.return_value = True
+        with patch_open() as (mock_open, mock_file):
+            mock_file.read.return_value = "abc"
+            relations.upgrade_charm()
+            file = os.path.join(relations.HEAT_PATH, 'encryption-key')
+            mock_open.assert_called_once_with(file, 'r')
+            self.leader_set.assert_called_once_with(
+                {'heat-auth-encryption-key': 'abc'})
+            os_remove.assert_called_once_with(file)
 
     def test_db_joined(self):
         self.get_relation_ip.return_value = '192.168.20.1'

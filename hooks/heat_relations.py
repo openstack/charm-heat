@@ -95,6 +95,7 @@ from heat_utils import (
 
 from heat_context import (
     API_PORTS,
+    HEAT_PATH,
 )
 
 from charmhelpers.contrib.openstack.context import ADDRESS_TYPES
@@ -154,6 +155,25 @@ def config_changed():
 @hooks.hook('upgrade-charm')
 @harden()
 def upgrade_charm():
+    if is_leader():
+        # if we are upgrading, then the old version might have used the
+        # HEAT_PATH/encryption-key. So we grab the key from that, and put it in
+        # leader settings to ensure that the key remains the same during an
+        # upgrade.
+        encryption_path = os.path.join(HEAT_PATH, 'encryption-key')
+        if os.path.isfile(encryption_path):
+            with open(encryption_path, 'r') as f:
+                encryption_key = f.read()
+            try:
+                leader_set({'heat-auth-encryption-key': encryption_key})
+            except subprocess.CalledProcessError as e:
+                log("upgrade: leader_set: heat-auth-encryption-key failed,"
+                    " didn't delete the existing file: {}.\n"
+                    "Error was: ".format(encryption_path, str(e)),
+                    level=WARNING)
+            else:
+                # now we just delete the file
+                os.remove(encryption_path)
     leader_elected()
 
 
@@ -283,8 +303,19 @@ def relation_broken():
 
 @hooks.hook('leader-elected')
 def leader_elected():
-    if is_leader() and not leader_get('heat-domain-admin-passwd'):
-        leader_set({'heat-domain-admin-passwd': pwgen(32)})
+    if is_leader():
+        if not leader_get('heat-domain-admin-passwd'):
+            try:
+                leader_set({'heat-domain-admin-passwd': pwgen(32)})
+            except subprocess.CalledProcessError as e:
+                log('leader_set: heat-domain-admin-password failed: {}'
+                    .format(str(e)), level=WARNING)
+        if not leader_get('heat-auth-encryption-key'):
+            try:
+                leader_set({'heat-auth-encryption-key': pwgen(32)})
+            except subprocess.CalledProcessError as e:
+                log('leader_set: heat-domain-admin-password failed: {}'
+                    .format(str(e)), level=WARNING)
 
 
 @hooks.hook('cluster-relation-joined')
