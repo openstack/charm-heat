@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
 from charmhelpers.contrib.openstack import context
 from charmhelpers.core.hookenv import config, leader_get
-from charmhelpers.core.host import pwgen
 from charmhelpers.contrib.hahelpers.cluster import (
     determine_apache_port,
     determine_api_port,
@@ -51,21 +48,10 @@ class HeatIdentityServiceContext(context.IdentityServiceContext):
 
 
 def get_encryption_key():
-    encryption_path = os.path.join(HEAT_PATH, 'encryption-key')
-    if os.path.isfile(encryption_path):
-        with open(encryption_path, 'r') as enc:
-            encryption = enc.read()
-    else:
-        # create encryption key and store it
-        if not os.path.isdir(HEAT_PATH):
-            os.makedirs(HEAT_PATH)
-        encryption = config("encryption-key")
-        if not encryption:
-            # generate random key
-            encryption = pwgen(16)
-        with open(encryption_path, 'w') as enc:
-            enc.write(encryption)
-    return encryption
+    encryption_key = config("encryption-key")
+    if not encryption_key:
+        encryption_key = leader_get('heat-auth-encryption-key')
+    return encryption_key
 
 
 class HeatSecurityContext(context.OSContextGenerator):
@@ -73,10 +59,9 @@ class HeatSecurityContext(context.OSContextGenerator):
     def __call__(self):
         ctxt = {}
         # check if we have stored encryption key
-        encryption = get_encryption_key()
-        ctxt['encryption_key'] = encryption
-        ctxt['heat_domain_admin_passwd'] = \
-            leader_get('heat-domain-admin-passwd')
+        ctxt['encryption_key'] = get_encryption_key()
+        ctxt['heat_domain_admin_passwd'] = (
+            leader_get('heat-domain-admin-passwd'))
         return ctxt
 
 
