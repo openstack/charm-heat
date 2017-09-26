@@ -9,6 +9,7 @@ tags:
   - openstack
 series:
   - xenial
+  - artful
   - zesty
   - trusty
 extra-bindings:
