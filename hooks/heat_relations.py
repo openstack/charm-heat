@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Copyright 2016 Canonical Ltd
 #
@@ -120,7 +120,7 @@ def install():
     if os.path.isdir(_files):
         for f in os.listdir(_files):
             f = os.path.join(_files, f)
-            log('Installing %s to /usr/bin' % f)
+            log('Installing {} to /usr/bin'.format(f))
             shutil.copy2(f, '/usr/bin')
 
     for port in API_PORTS.values():
@@ -228,7 +228,7 @@ def db_changed():
             migrate_database()
         else:
             log('allowed_units either not presented, or local unit '
-                'not in acl list: %s' % repr(allowed_units))
+                'not in acl list: {}'.format(repr(allowed_units)))
 
 
 def configure_https():
@@ -257,15 +257,15 @@ def identity_joined(rid=None):
     internal_url_base = canonical_url(CONFIGS, INTERNAL)
     admin_url_base = canonical_url(CONFIGS, ADMIN)
 
-    api_url_template = '%s:8004/v1/$(tenant_id)s'
-    public_api_endpoint = (api_url_template % public_url_base)
-    internal_api_endpoint = (api_url_template % internal_url_base)
-    admin_api_endpoint = (api_url_template % admin_url_base)
+    api_url_template = '{}:8004/v1/$(tenant_id)s'
+    public_api_endpoint = (api_url_template.format(public_url_base))
+    internal_api_endpoint = (api_url_template.format(internal_url_base))
+    admin_api_endpoint = (api_url_template.format(admin_url_base))
 
-    cfn_url_template = '%s:8000/v1'
-    public_cfn_endpoint = (cfn_url_template % public_url_base)
-    internal_cfn_endpoint = (cfn_url_template % internal_url_base)
-    admin_cfn_endpoint = (cfn_url_template % admin_url_base)
+    cfn_url_template = '{}:8000/v1'
+    public_cfn_endpoint = (cfn_url_template.format(public_url_base))
+    internal_cfn_endpoint = (cfn_url_template.format(internal_url_base))
+    admin_cfn_endpoint = (cfn_url_template.format(admin_url_base))
 
     relation_data = {
         'heat_service': 'heat',
@@ -378,8 +378,9 @@ def ha_joined(relation_id=None):
                     if vip not in resource_params[vip_key]:
                         vip_key = '{}_{}'.format(vip_key, vip_params)
                     else:
-                        log("Resource '%s' (vip='%s') already exists in "
-                            "vip group - skipping" % (vip_key, vip), WARNING)
+                        log("Resource '{}' (vip='{}') already exists in "
+                            "vip group - skipping".format(vip_key, vip),
+                            WARNING)
                         continue
 
                 resources[vip_key] = res_heat_vip

@@ -145,11 +145,11 @@ class HeatRelationTests(CharmTestCase):
         with patch_open() as (mock_open, mock_file):
             mock_file.read.return_value = "abc"
             relations.upgrade_charm()
-            file = os.path.join(relations.HEAT_PATH, 'encryption-key')
-            mock_open.assert_called_once_with(file, 'r')
+            filename = os.path.join(relations.HEAT_PATH, 'encryption-key')
+            mock_open.assert_called_once_with(filename, 'r')
             self.leader_set.assert_called_once_with(
                 {'heat-auth-encryption-key': 'abc'})
-            os_remove.assert_called_once_with(file)
+            os_remove.assert_called_once_with(filename)
 
     def test_db_joined(self):
         self.get_relation_ip.return_value = '192.168.20.1'

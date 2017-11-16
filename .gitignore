@@ -10,3 +10,6 @@ trusty/
 xenial/
 .unit-state.db
 tests/cirros-*-disk.img
+func-results.json
+__pycache__
+.stestr/

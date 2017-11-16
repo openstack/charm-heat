@@ -75,7 +75,7 @@ class HeatUtilsTests(CharmTestCase):
         pkgs = utils.determine_packages()
         ex = list(set(utils.BASE_PACKAGES + ['memcached'] +
                       utils.BASE_SERVICES))
-        self.assertEqual(ex, pkgs)
+        self.assertEqual(sorted(ex), sorted(pkgs))
 
     def test_restart_map(self):
         self.assertEqual(RESTART_MAP, utils.restart_map())

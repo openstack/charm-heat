@@ -556,7 +556,7 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
             },
         }
 
-        for section, pairs in expected.iteritems():
+        for section, pairs in expected.items():
             ret = u.validate_config_data(unit, conf, section, pairs)
             if ret:
                 message = "heat config error: {}".format(ret)
@@ -687,7 +687,7 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
         self.d.configure(juju_service, set_alternate)
 
         sleep_time = 30
-        for s, conf_file in services.iteritems():
+        for s, conf_file in services.items():
             u.log.debug("Checking that service restarted: {}".format(s))
             if not u.validate_service_config_changed(sentry, mtime, s,
                                                      conf_file,
