@@ -468,7 +468,7 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
             'auth_protocol': 'http',
             'private-address': u.valid_ip,
             'auth_host': u.valid_ip,
-            'service_username': 'heat-cfn_heat',
+            'service_username': 'heat_heat-cfn',
             'service_tenant_id': u.not_null,
             'service_host': u.valid_ip
         }
