@@ -47,12 +47,11 @@ TEMPLATE_REL_PATH = 'tests/files/hot_hello_world.yaml'
 class HeatBasicDeployment(OpenStackAmuletDeployment):
     """Amulet tests on a basic heat deployment."""
 
-    def __init__(self, series=None, openstack=None, source=None, git=False,
+    def __init__(self, series=None, openstack=None, source=None,
                  stable=False):
         """Deploy the entire test environment."""
         super(HeatBasicDeployment, self).__init__(series, openstack,
                                                   source, stable)
-        self.git = git
         self._add_services()
         self._add_relations()
         self._configure_services()

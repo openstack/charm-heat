@@ -50,11 +50,9 @@ class TestHeatUpgradeActions(CharmTestCase):
     @patch('charmhelpers.contrib.openstack.utils.juju_log')
     @patch('charmhelpers.contrib.openstack.utils.config')
     @patch('charmhelpers.contrib.openstack.utils.action_set')
-    @patch('charmhelpers.contrib.openstack.utils.git_install_requested')
     @patch('charmhelpers.contrib.openstack.utils.openstack_upgrade_available')
-    def test_openstack_upgrade_true(self, upgrade_avail, git_requested,
+    def test_openstack_upgrade_true(self, upgrade_avail,
                                     action_set, config, log):
-        git_requested.return_value = False
         upgrade_avail.return_value = True
         config.return_value = True
 
@@ -66,11 +64,9 @@ class TestHeatUpgradeActions(CharmTestCase):
     @patch('charmhelpers.contrib.openstack.utils.juju_log')
     @patch('charmhelpers.contrib.openstack.utils.config')
     @patch('charmhelpers.contrib.openstack.utils.action_set')
-    @patch('charmhelpers.contrib.openstack.utils.git_install_requested')
     @patch('charmhelpers.contrib.openstack.utils.openstack_upgrade_available')
-    def test_openstack_upgrade_false(self, upgrade_avail, git_requested,
+    def test_openstack_upgrade_false(self, upgrade_avail,
                                      action_set, config, log):
-        git_requested.return_value = False
         upgrade_avail.return_value = True
         config.return_value = False
 
