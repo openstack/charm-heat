@@ -564,7 +564,7 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
     def test_400_heat_resource_types_list(self):
         """Check default heat resource list behavior, also confirm
            heat functionality."""
-        u.log.debug('Checking default heat resouce list...')
+        u.log.debug('Checking default heat resource list...')
         try:
             types = list(self.heat.resource_types.list())
             if type(types) is list:
