@@ -103,7 +103,7 @@ CONFIG_FILES = OrderedDict([
                      context.SharedDBContext(relation_prefix='heat',
                                              ssl_dir=HEAT_DIR),
                      context.OSConfigFlagContext(),
-                     context.InternalEndpointContext('heat-common'),
+                     context.InternalEndpointContext(),
                      HeatIdentityServiceContext(service=SVC, service_user=SVC),
                      HeatHAProxyContext(),
                      HeatSecurityContext(),
