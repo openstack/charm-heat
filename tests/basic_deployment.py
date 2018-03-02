@@ -32,6 +32,8 @@ from charmhelpers.contrib.openstack.amulet.utils import (
     DEBUG,
     # ERROR,
 )
+import glanceclient
+from novaclient import client as nova_client
 
 # Use DEBUG to turn on debug logging
 u = OpenStackAmuletUtils(DEBUG)
@@ -176,23 +178,19 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
             self._get_openstack_release_string()))
 
         # Authenticate admin with keystone
-        self.keystone = u.authenticate_keystone_admin(self.keystone_sentry,
-                                                      user='admin',
-                                                      password='openstack',
-                                                      tenant='admin')
+        self.keystone_session, self.keystone = u.get_default_keystone_session(
+            self.keystone_sentry,
+            openstack_release=self._get_openstack_release())
 
         # Authenticate admin with glance endpoint
-        self.glance = u.authenticate_glance_admin(self.keystone)
+        self.glance = glanceclient.Client('1', session=self.keystone_session)
 
         # Authenticate admin with nova endpoint
-        self.nova = u.authenticate_nova_user(self.keystone,
-                                             user='admin',
-                                             password='openstack',
-                                             tenant='admin')
+        self.nova = nova_client.Client(2, session=self.keystone_session)
 
         u.create_flavor(nova=self.nova,
                         name='m1.tiny', ram=512, vcpus=1, disk=1)
-        # Authenticate admin with heat endpoint
+
         self.heat = u.authenticate_heat_admin(self.keystone)
 
         # Action is REQUIRED to run for a functioning heat deployment
@@ -361,7 +359,10 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
                     'image': [ep_validate], 'identity': [ep_validate]}
 
         actual = self.keystone.service_catalog.get_endpoints()
-        ret = u.validate_svc_catalog_endpoint_data(expected, actual)
+        ret = u.validate_svc_catalog_endpoint_data(
+            expected,
+            actual,
+            openstack_release=self._get_openstack_release())
         if ret:
             amulet.raise_status(amulet.FAIL, msg=ret)
 
@@ -384,8 +385,13 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
                     'publicurl': u.valid_url,
                     'service_id': u.not_null}
 
-        ret = u.validate_endpoint_data(endpoints, admin_port, internal_port,
-                                       public_port, expected)
+        ret = u.validate_endpoint_data(
+            endpoints,
+            admin_port,
+            internal_port,
+            public_port,
+            expected,
+            openstack_release=self._get_openstack_release())
         if ret:
             message = 'heat endpoint: {}'.format(ret)
             amulet.raise_status(amulet.FAIL, msg=message)
