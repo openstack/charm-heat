@@ -76,7 +76,7 @@ def get_ca_cert():
 def retrieve_ca_cert(cert_file):
     cert = None
     if os.path.isfile(cert_file):
-        with open(cert_file, 'r') as crt:
+        with open(cert_file, 'rb') as crt:
             cert = crt.read()
     return cert
 
