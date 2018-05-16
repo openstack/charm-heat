@@ -26,6 +26,8 @@ requires:
   ha:
     interface: hacluster
     scope: container
+  certificates:
+    interface: tls-certificates
 peers:
   cluster:
     interface: heat-ha

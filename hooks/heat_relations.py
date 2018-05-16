@@ -102,6 +102,11 @@ from charmhelpers.contrib.openstack.context import ADDRESS_TYPES
 from charmhelpers.payload.execd import execd_preinstall
 from charmhelpers.contrib.hardening.harden import harden
 
+from charmhelpers.contrib.openstack.cert_utils import (
+    get_certificate_request,
+    process_certificates,
+)
+
 hooks = Hooks()
 CONFIGS = register_configs()
 
@@ -428,6 +433,20 @@ def ha_changed():
 @harden()
 def update_status():
     log('Updating status.')
+
+
+@hooks.hook('certificates-relation-joined')
+def certs_joined(relation_id=None):
+    relation_set(
+        relation_id=relation_id,
+        relation_settings=get_certificate_request())
+
+
+@hooks.hook('certificates-relation-changed')
+@restart_on_change(restart_map(), stopstart=True)
+def certs_changed(relation_id=None, unit=None):
+    process_certificates('heat', relation_id, unit)
+    configure_https()
 
 
 def main():
