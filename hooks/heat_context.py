@@ -13,7 +13,13 @@
 # limitations under the License.
 
 from charmhelpers.contrib.openstack import context
-from charmhelpers.core.hookenv import config, leader_get
+from charmhelpers.core.hookenv import (
+    config,
+    relation_ids,
+    related_units,
+    relation_get,
+    leader_get,
+)
 from charmhelpers.contrib.hahelpers.cluster import (
     determine_apache_port,
     determine_api_port,
@@ -97,6 +103,37 @@ class HeatApacheSSLContext(context.ApacheSSLContext):
 
     external_ports = API_PORTS.values()
     service_namespace = 'heat'
+
+
+class HeatPluginContext(context.SubordinateConfigContext):
+    interfaces = 'heat-plugin-subordinate'
+
+    def __init__(self):
+        super(HeatPluginContext, self).__init__(
+            interface='heat-plugin-subordinate',
+            service='heat',
+            config_file='/etc/heat/heat.conf')
+
+    def __call__(self):
+        ctxt = super(HeatPluginContext, self).__call__()
+        defaults = {
+            'plugin-dirs': {
+                'templ_key': 'plugin_dirs',
+                'value': '/usr/lib64/heat,/usr/lib/heat',
+            },
+        }
+        for rid in relation_ids('heat-plugin-subordinate'):
+            for unit in related_units(rid):
+                rdata = relation_get(rid=rid, unit=unit)
+                for key in defaults.keys():
+                    remote_value = rdata.get(key)
+                    ctxt_key = defaults[key]['templ_key']
+                    if remote_value:
+                        ctxt[ctxt_key] = remote_value
+                    else:
+                        ctxt[ctxt_key] = defaults[key]['value']
+                return ctxt
+        return ctxt
 
 
 class InstanceUserContext(context.OSContextGenerator):

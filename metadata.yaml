@@ -28,6 +28,9 @@ requires:
     scope: container
   certificates:
     interface: tls-certificates
+  heat-plugin-subordinate:
+    interface: heat-plugin-subordinate
+    scope: container
 peers:
   cluster:
     interface: heat-ha

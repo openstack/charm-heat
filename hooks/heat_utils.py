@@ -54,6 +54,7 @@ from heat_context import (
     InstanceUserContext,
     HeatApacheSSLContext,
     HeatHAProxyContext,
+    HeatPluginContext,
 )
 
 TEMPLATES = 'templates/'
@@ -108,6 +109,7 @@ CONFIG_FILES = OrderedDict([
                      HeatHAProxyContext(),
                      HeatSecurityContext(),
                      InstanceUserContext(),
+                     HeatPluginContext(),
                      context.SyslogContext(),
                      context.LogLevelContext(),
                      context.WorkerConfigContext(),

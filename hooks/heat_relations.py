@@ -429,6 +429,13 @@ def ha_changed():
             identity_joined(rid=rid)
 
 
+@hooks.hook('heat-plugin-subordinate-relation-joined',
+            'heat-plugin-subordinate-relation-changed')
+@restart_on_change(restart_map(), stopstart=True)
+def heat_plugin_subordinate_relation_joined(relid=None):
+    CONFIGS.write_all()
+
+
 @hooks.hook('update-status')
 @harden()
 def update_status():
