@@ -101,7 +101,6 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
             'heat:identity-service': 'keystone:identity-service',
             'heat:shared-db': 'percona-cluster:shared-db',
             'nova-compute:image-service': 'glance:image-service',
-            'nova-compute:shared-db': 'percona-cluster:shared-db',
             'nova-compute:amqp': 'rabbitmq-server:amqp',
             'nova-cloud-controller:shared-db': 'percona-cluster:shared-db',
             'nova-cloud-controller:identity-service':
