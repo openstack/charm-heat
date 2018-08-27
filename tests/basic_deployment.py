@@ -182,7 +182,7 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
             openstack_release=self._get_openstack_release())
 
         # Authenticate admin with glance endpoint
-        self.glance = glanceclient.Client('1', session=self.keystone_session)
+        self.glance = glanceclient.Client('2', session=self.keystone_session)
 
         # Authenticate admin with nova endpoint
         self.nova = nova_client.Client(2, session=self.keystone_session)
@@ -325,7 +325,7 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
         """Delete that image."""
         u.log.debug('Deleting glance image...')
         image = self.nova.glance.find_image(IMAGE_NAME)
-        u.delete_resource(self.glance.images, image, msg="glance image")
+        u.delete_resource(self.glance.images, image.id, msg="glance image")
 
     def _keypair_delete(self):
         """Delete that keypair."""
