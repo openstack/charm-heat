@@ -69,13 +69,36 @@ class HeatUtilsTests(CharmTestCase):
         self.assertEqual(ex, pkgs)
 
     @patch('charmhelpers.contrib.openstack.context.SubordinateConfigContext')
-    def test_determine_packages_newton(self, subcontext):
-        self.os_release.return_value = 'newton'
-        self.token_cache_pkgs.return_value = ['memcached']
+    def test_determine_packages_queens(self, subcontext):
+        self.os_release.return_value = 'queens'
+        self.token_cache_pkgs.return_value = ['python-memcache', 'memcached']
         pkgs = utils.determine_packages()
-        ex = list(set(utils.BASE_PACKAGES + ['memcached'] +
+        ex = list(set(utils.BASE_PACKAGES + ['python-memcache', 'memcached'] +
                       utils.BASE_SERVICES))
         self.assertEqual(sorted(ex), sorted(pkgs))
+
+    @patch('charmhelpers.contrib.openstack.context.SubordinateConfigContext')
+    def test_determine_packages_rocky(self, subcontext):
+        self.os_release.return_value = 'rocky'
+        self.token_cache_pkgs.return_value = ['python-memcache', 'memcached']
+        pkgs = utils.determine_packages()
+        ex = list(set(
+            [p for p in utils.BASE_PACKAGES if not p.startswith('python-')] +
+            ['memcached'] + utils.BASE_SERVICES + utils.PY3_PACKAGES))
+        self.assertEqual(sorted(ex), sorted(pkgs))
+
+    def test_determine_purge_packages(self):
+        'Ensure no packages are identified for purge prior to rocky'
+        self.os_release.return_value = 'queens'
+        self.assertEqual(utils.determine_purge_packages(), [])
+
+    def test_determine_purge_packages_rocky(self):
+        'Ensure python packages are identified for purge at rocky'
+        self.os_release.return_value = 'rocky'
+        self.assertEqual(utils.determine_purge_packages(),
+                         [p for p in utils.BASE_PACKAGES
+                          if p.startswith('python-')] +
+                         ['python-heat', 'python-memcache'])
 
     def test_restart_map(self):
         self.assertEqual(RESTART_MAP, utils.restart_map())
@@ -84,6 +107,7 @@ class HeatUtilsTests(CharmTestCase):
         self.config.side_effect = None
         self.config.return_value = 'cloud:precise-havana'
         self.get_os_codename_install_source.return_value = 'havana'
+        self.os_release.return_value = 'icehouse'
         configs = MagicMock()
         utils.do_openstack_upgrade(configs)
         self.assertTrue(self.apt_update.called)

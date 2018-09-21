@@ -33,6 +33,9 @@ from charmhelpers.fetch import (
     apt_install,
     apt_update,
     apt_upgrade,
+    apt_purge,
+    apt_autoremove,
+    filter_missing_packages,
 )
 
 from charmhelpers.core.hookenv import (
@@ -74,6 +77,14 @@ BASE_PACKAGES = [
     'uuid',
     'apache2',
     'haproxy',
+]
+
+PY3_PACKAGES = [
+    'python3-heat',
+    'python3-keystoneclient',
+    'python3-memcache',
+    'python3-swiftclient',
+    'python3-six',
 ]
 
 VERSION_PACKAGE = 'heat-common'
@@ -173,10 +184,32 @@ def api_port(service):
 
 
 def determine_packages():
+    release = CompareOpenStackReleases(os_release('heat-common'))
+
     # currently all packages match service names
     packages = BASE_PACKAGES + BASE_SERVICES
     packages.extend(token_cache_pkgs(source=config('openstack-origin')))
+
+    if release >= 'rocky':
+        packages = [p for p in packages if not p.startswith('python-')]
+        packages.extend(PY3_PACKAGES)
+
     return list(set(packages))
+
+
+def determine_purge_packages():
+    '''
+    Determine list of packages that where previously installed which are no
+    longer needed.
+
+    :returns: list of package names
+    '''
+    release = CompareOpenStackReleases(os_release('heat-common'))
+    if release >= 'rocky':
+        pkgs = [p for p in BASE_PACKAGES if p.startswith('python-')]
+        pkgs.extend(['python-heat', 'python-memcache'])
+        return pkgs
+    return []
 
 
 def do_openstack_upgrade(configs):
@@ -202,6 +235,11 @@ def do_openstack_upgrade(configs):
     apt_update()
     apt_upgrade(options=dpkg_opts, fatal=True, dist=True)
     apt_install(packages=determine_packages(), options=dpkg_opts, fatal=True)
+
+    installed_packages = filter_missing_packages(determine_purge_packages())
+    if installed_packages:
+        apt_purge(installed_packages, fatal=True)
+        apt_autoremove(purge=True, fatal=True)
 
     # set CONFIGS to load templates from new release and regenerate config
     configs.set_release(openstack_release=new_os_rel)
