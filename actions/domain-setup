@@ -10,7 +10,7 @@ openstack domain show heat || {
     openstack domain create --description "Stack projects and users" heat
 }
 
-openstack user show heat_domain_admin || {
+openstack user show --domain heat heat_domain_admin || {
     openstack user create --domain heat --password `leader-get heat-domain-admin-passwd` heat_domain_admin
 }
 
