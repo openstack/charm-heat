@@ -17,6 +17,7 @@
 """
 Basic heat functional test.
 """
+import os
 import json
 import subprocess
 
@@ -32,7 +33,6 @@ from charmhelpers.contrib.openstack.amulet.utils import (
     DEBUG,
     # ERROR,
 )
-import glanceclient
 from novaclient import client as nova_client
 
 # Use DEBUG to turn on debug logging
@@ -43,7 +43,7 @@ IMAGE_NAME = 'cirros-image-1'
 KEYPAIR_NAME = 'testkey'
 STACK_NAME = 'hello_world'
 RESOURCE_TYPE = 'server'
-TEMPLATE_REL_PATH = 'tests/files/hot_hello_world.yaml'
+TEMPLATES_PATH = 'tests/files'
 
 
 class HeatBasicDeployment(OpenStackAmuletDeployment):
@@ -181,8 +181,18 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
             self.keystone_sentry,
             openstack_release=self._get_openstack_release())
 
+        force_v1_client = False
+        if self._get_openstack_release() == self.trusty_icehouse:
+            # Updating image properties (such as arch or hypervisor) using the
+            # v2 api in icehouse results in:
+            # https://bugs.launchpad.net/python-glanceclient/+bug/1371559
+            u.log.debug('Forcing glance to use v1 api')
+            force_v1_client = True
+
         # Authenticate admin with glance endpoint
-        self.glance = glanceclient.Client('2', session=self.keystone_session)
+        self.glance = u.authenticate_glance_admin(
+            self.keystone,
+            force_v1_client=force_v1_client)
 
         # Authenticate admin with nova endpoint
         self.nova = nova_client.Client(2, session=self.keystone_session)
@@ -231,7 +241,14 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
         """Create a heat stack from a basic heat template, verify its status"""
         u.log.debug('Creating heat stack...')
 
-        t_url = u.file_to_url(TEMPLATE_REL_PATH)
+        t_name = 'hot_hello_world.yaml'
+        if self._get_openstack_release() < self.xenial_queens:
+            t_url = u.file_to_url(os.path.join(TEMPLATES_PATH, 'icehouse',
+                                               t_name))
+        else:
+            t_url = u.file_to_url(os.path.join(TEMPLATES_PATH, 'queens',
+                                               t_name))
+
         r_req = self.heat.http_client
         u.log.debug('template url: {}'.format(t_url))
 
