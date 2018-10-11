@@ -28,7 +28,8 @@ mock_apt.apt_pkg = MagicMock()
 with patch('charmhelpers.contrib.hardening.harden.harden') as mock_dec:
     mock_dec.side_effect = (lambda *dargs, **dkwargs: lambda f:
                             lambda *args, **kwargs: f(*args, **kwargs))
-    with patch('heat_utils.register_configs') as register_configs:
+    with patch('heat_utils.register_configs') as register_configs, \
+            patch('heat_utils.resource_map') as resource_map:
         import openstack_upgrade
 
 from test_utils import (

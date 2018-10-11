@@ -719,3 +719,27 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
             sleep_time = 0
 
         self.d.configure(juju_service, set_default)
+
+    def test_901_pause_resume(self):
+        """Test pause and resume actions."""
+        u.log.debug('Checking pause and resume actions...')
+        unit = self.d.sentry['heat'][0]
+        unit_name = unit.info['unit_name']
+
+        u.log.debug('Checking for active status on {}'.format(unit_name))
+        assert u.status_get(unit)[0] == "active"
+
+        u.log.debug('Running pause action on {}'.format(unit_name))
+        action_id = u.run_action(unit, "pause")
+        u.log.debug('Waiting on action {}'.format(action_id))
+        assert u.wait_on_action(action_id), "Pause action failed."
+        u.log.debug('Checking for maintenance status on {}'.format(unit_name))
+        assert u.status_get(unit)[0] == "maintenance"
+
+        u.log.debug('Running resume action on {}'.format(unit_name))
+        action_id = u.run_action(unit, "resume")
+        u.log.debug('Waiting on action {}'.format(action_id))
+        assert u.wait_on_action(action_id), "Resume action failed."
+        u.log.debug('Checking for active status on {}'.format(unit_name))
+        assert u.status_get(unit)[0] == "active"
+        u.log.debug('OK')

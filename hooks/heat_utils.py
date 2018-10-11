@@ -14,6 +14,7 @@
 
 import os
 
+from copy import deepcopy
 from collections import OrderedDict
 from subprocess import check_call
 
@@ -26,7 +27,16 @@ from charmhelpers.contrib.openstack.utils import (
     token_cache_pkgs,
     enable_memcache,
     CompareOpenStackReleases,
+    os_application_version_set,
+    make_assess_status_func,
+    pause_unit,
+    resume_unit,
 )
+
+from charmhelpers.contrib.hahelpers.cluster import (
+    get_hacluster_config,
+)
+
 
 from charmhelpers.fetch import (
     add_source,
@@ -41,6 +51,7 @@ from charmhelpers.fetch import (
 from charmhelpers.core.hookenv import (
     log,
     config,
+    relation_ids,
 )
 
 from charmhelpers.core.host import (
@@ -151,31 +162,41 @@ CONFIG_FILES = OrderedDict([
         'services': []
     }),
     (MEMCACHED_CONF, {
-        'hook_contexts': [context.MemcacheContext()],
+        'contexts': [context.MemcacheContext()],
         'services': ['memcached'],
     }),
 ])
 
 
-def register_configs():
-    release = os_release('heat-common')
-    configs = templating.OSConfigRenderer(templates_dir=TEMPLATES,
-                                          openstack_release=release)
-
-    confs = [HEAT_CONF, HEAT_API_PASTE, HAPROXY_CONF, ADMIN_OPENRC]
-    for conf in confs:
-        configs.register(conf, CONFIG_FILES[conf]['contexts'])
+def resource_map(release=None):
+    """
+    Dynamically generate a map of resources that will be managed for a single
+    hook execution.
+    """
+    _release = release or os_release('heat-common', base='icehouse')
+    _resource_map = deepcopy(CONFIG_FILES)
 
     if os.path.exists('/etc/apache2/conf-available'):
-        configs.register(HTTPS_APACHE_24_CONF,
-                         CONFIG_FILES[HTTPS_APACHE_24_CONF]['contexts'])
+        _resource_map.pop(HTTPS_APACHE_CONF)
     else:
-        configs.register(HTTPS_APACHE_CONF,
-                         CONFIG_FILES[HTTPS_APACHE_CONF]['contexts'])
+        _resource_map.pop(HTTPS_APACHE_24_CONF)
 
-    if enable_memcache(release=release):
-        configs.register(MEMCACHED_CONF,
-                         CONFIG_FILES[MEMCACHED_CONF]['hook_contexts'])
+    if not enable_memcache(release=_release):
+        _resource_map.pop(MEMCACHED_CONF)
+
+    return _resource_map
+
+
+def register_configs(release=None):
+    """Register config files with their respective contexts.
+    Regstration of some configs may not be required depending on
+    existing of certain relations.
+    """
+    release = release or os_release('heat-common', base='icehouse')
+    configs = templating.OSConfigRenderer(templates_dir=TEMPLATES,
+                                          openstack_release=release)
+    for cfg, rscs in resource_map(release).items():
+        configs.register(cfg, rscs['contexts'])
     return configs
 
 
@@ -249,22 +270,15 @@ def do_openstack_upgrade(configs):
 
 
 def restart_map():
-    """Restarts on config change.
-
-    Determine the correct resource map to be passed to
+    '''Determine the correct resource map to be passed to
     charmhelpers.core.restart_on_change() based on the services configured.
 
     :returns: dict: A dictionary mapping config file to lists of services
-    that should be restarted when file changes.
-    """
-    _map = []
-    for f, ctxt in CONFIG_FILES.items():
-        svcs = []
-        for svc in ctxt['services']:
-            svcs.append(svc)
-        if svcs:
-            _map.append((f, svcs))
-    return OrderedDict(_map)
+                    that should be restarted when file changes.
+    '''
+    return OrderedDict([(cfg, v['services'])
+                        for cfg, v in resource_map().items()
+                        if v['services']])
 
 
 def services():
@@ -297,3 +311,113 @@ def setup_ipv6():
                    'main')
         apt_update()
         apt_install('haproxy/trusty-backports', fatal=True)
+
+
+def check_optional_relations(configs):
+    """Check that if we have a relation_id for high availability that we can
+    get the hacluster config.  If we can't then we are blocked.
+
+    This function is called from assess_status/set_os_workload_status as the
+    charm_func and needs to return either None, None if there is no problem or
+    the status, message if there is a problem.
+
+    :param configs: an OSConfigRender() instance.
+    :return 2-tuple: (string, string) = (status, message)
+    """
+    if relation_ids('ha'):
+        try:
+            get_hacluster_config()
+        except:
+            return ('blocked',
+                    'hacluster missing configuration: '
+                    'vip, vip_iface, vip_cidr')
+    # return 'unknown' as the lowest priority to not clobber an existing
+    # status.
+    return "unknown", ""
+
+
+def get_optional_interfaces():
+    """Return the optional interfaces that should be checked if the relavent
+    relations have appeared.
+
+    :returns: {general_interface: [specific_int1, specific_int2, ...], ...}
+    """
+    optional_interfaces = {}
+    if relation_ids('ha'):
+        optional_interfaces['ha'] = ['cluster']
+
+    return optional_interfaces
+
+
+def assess_status(configs):
+    """Assess status of current unit
+    Decides what the state of the unit should be based on the current
+    configuration.
+    SIDE EFFECT: calls set_os_workload_status(...) which sets the workload
+    status of the unit.
+    Also calls status_set(...) directly if paused state isn't complete.
+    @param configs: a templating.OSConfigRenderer() object
+    @returns None - this function is executed for its side-effect
+    """
+    assess_status_func(configs)()
+    os_application_version_set(VERSION_PACKAGE)
+
+
+def assess_status_func(configs):
+    """Helper function to create the function that will assess_status() for
+    the unit.
+    Uses charmhelpers.contrib.openstack.utils.make_assess_status_func() to
+    create the appropriate status function and then returns it.
+    Used directly by assess_status() and also for pausing and resuming
+    the unit.
+
+    NOTE: REQUIRED_INTERFACES is augmented with the optional interfaces
+    depending on the current config before being passed to the
+    make_assess_status_func() function.
+
+    NOTE(ajkavanagh) ports are not checked due to race hazards with services
+    that don't behave sychronously w.r.t their service scripts.  e.g.
+    apache2.
+    @param configs: a templating.OSConfigRenderer() object
+    @return f() -> None : a function that assesses the unit's workload status
+    """
+    required_interfaces = REQUIRED_INTERFACES.copy()
+    required_interfaces.update(get_optional_interfaces())
+    return make_assess_status_func(
+        configs, required_interfaces,
+        charm_func=check_optional_relations,
+        services=services(), ports=None)
+
+
+def pause_unit_helper(configs):
+    """Helper function to pause a unit, and then call assess_status(...) in
+    effect, so that the status is correctly updated.
+    Uses charmhelpers.contrib.openstack.utils.pause_unit() to do the work.
+    @param configs: a templating.OSConfigRenderer() object
+    @returns None - this function is executed for its side-effect
+    """
+    _pause_resume_helper(pause_unit, configs)
+
+
+def resume_unit_helper(configs):
+    """Helper function to resume a unit, and then call assess_status(...) in
+    effect, so that the status is correctly updated.
+    Uses charmhelpers.contrib.openstack.utils.resume_unit() to do the work.
+    @param configs: a templating.OSConfigRenderer() object
+    @returns None - this function is executed for its side-effect
+    """
+    _pause_resume_helper(resume_unit, configs)
+
+
+def _pause_resume_helper(f, configs):
+    """Helper function that uses the make_assess_status_func(...) from
+    charmhelpers.contrib.openstack.utils to create an assess_status(...)
+    function that can be used with the pause/resume of the unit
+    @param f: the function to be used with the assess_status(...) function
+    @returns None - this function is executed for its side-effect
+    """
+    # TODO(ajkavanagh) - ports= has been left off because of the race hazard
+    # that exists due to service_start()
+    f(assess_status_func(configs),
+      services=services(),
+      ports=None)

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from copy import deepcopy
 from collections import OrderedDict
 from mock import patch, MagicMock, call
 from test_utils import CharmTestCase
@@ -39,6 +40,7 @@ TO_PATCH = [
     'service_stop',
     'token_cache_pkgs',
     'enable_memcache',
+    'os'
 ]
 
 
@@ -101,7 +103,24 @@ class HeatUtilsTests(CharmTestCase):
                          ['python-heat', 'python-memcache'])
 
     def test_restart_map(self):
-        self.assertEqual(RESTART_MAP, utils.restart_map())
+        # Icehouse
+        self.os_release.return_value = "icehouse"
+        self.enable_memcache.return_value = False
+        self.os.path.exists.return_value = False
+        _restart_map = deepcopy(RESTART_MAP)
+        _restart_map.pop(
+            "/etc/apache2/sites-available/openstack_https_frontend.conf")
+        _restart_map.pop("/etc/memcached.conf")
+        self.assertEqual(_restart_map, utils.restart_map())
+
+        # Mitaka
+        self.os_release.return_value = "mitaka"
+        self.enable_memcache.return_value = True
+        self.os.path.exists.return_value = True
+        _restart_map = deepcopy(RESTART_MAP)
+        _restart_map.pop(
+            "/etc/apache2/sites-available/openstack_https_frontend")
+        self.assertEqual(_restart_map, utils.restart_map())
 
     def test_openstack_upgrade(self):
         self.config.side_effect = None

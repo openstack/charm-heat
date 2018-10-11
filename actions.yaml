@@ -5,3 +5,14 @@ openstack-upgrade:
 domain-setup:
   description:
     Setup the keystone domains, roles and user required for Heat to operate. Only required for OpenStack >= Kilo.
+pause:
+  description: |
+    Pause heat services.
+    If the heat deployment is clustered using the hacluster charm, the
+    corresponding hacluster unit on the node must first be paused as well.
+    Not doing so may lead to an interruption of service.
+resume:
+  description: |
+    Resume heat services.
+    If the heat deployment is clustered using the hacluster charm, the
+    corresponding hacluster unit on the node must be resumed as well.

@@ -64,9 +64,9 @@ from charmhelpers.contrib.network.ip import (
 from charmhelpers.contrib.openstack.utils import (
     configure_installation_source,
     openstack_upgrade_available,
-    set_os_workload_status,
     sync_db_with_multi_ipv6_addresses,
-    os_application_version_set,
+    series_upgrade_prepare,
+    series_upgrade_complete,
 )
 
 from charmhelpers.contrib.openstack.ha.utils import (
@@ -88,9 +88,10 @@ from heat_utils import (
     register_configs,
     CLUSTER_RES,
     HEAT_CONF,
-    REQUIRED_INTERFACES,
     setup_ipv6,
-    VERSION_PACKAGE,
+    pause_unit_helper,
+    resume_unit_helper,
+    assess_status,
 )
 
 from heat_context import (
@@ -456,13 +457,26 @@ def certs_changed(relation_id=None, unit=None):
     configure_https()
 
 
+@hooks.hook('pre-series-upgrade')
+def pre_series_upgrade():
+    log("Running prepare series upgrade hook", "INFO")
+    series_upgrade_prepare(
+        pause_unit_helper, CONFIGS)
+
+
+@hooks.hook('post-series-upgrade')
+def post_series_upgrade():
+    log("Running complete series upgrade hook", "INFO")
+    series_upgrade_complete(
+        resume_unit_helper, CONFIGS)
+
+
 def main():
     try:
         hooks.execute(sys.argv)
     except UnregisteredHookError as e:
         log('Unknown hook {} - skipping.'.format(e))
-    set_os_workload_status(CONFIGS, REQUIRED_INTERFACES)
-    os_application_version_set(VERSION_PACKAGE)
+    assess_status(CONFIGS)
 
 
 if __name__ == '__main__':
