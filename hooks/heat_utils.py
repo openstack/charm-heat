@@ -73,7 +73,6 @@ REQUIRED_INTERFACES = {
 BASE_PACKAGES = [
     'python-keystoneclient',
     'python-swiftclient',  # work-around missing epoch in juno heat package
-    'python-six',
     'uuid',
     'apache2',
     'haproxy',
