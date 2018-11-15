@@ -55,6 +55,7 @@ TO_PATCH = [
     'apt_install',
     'apt_update',
     'restart_on_change',
+    'service_restart',
     # charmhelpers.contrib.openstack.utils
     'configure_installation_source',
     'openstack_upgrade_available',
@@ -68,6 +69,8 @@ TO_PATCH = [
     'restart_map',
     'register_configs',
     'do_openstack_upgrade',
+    'remove_old_packages',
+    'services',
     # other
     'execd_preinstall',
     'log',
@@ -133,12 +136,16 @@ class HeatRelationTests(CharmTestCase):
     def test_upgrade_charm(self, leader_elected, os_remove, os_path_isfile):
         os_path_isfile.return_value = False
         self.is_leader.return_value = False
+        self.remove_old_packages.return_value = True
+        self.services.return_value = ['heat-api']
+
         relations.upgrade_charm()
         leader_elected.assert_called_once_with()
         os_path_isfile.assert_not_called()
         # now say we are the leader
         self.is_leader.return_value = True
         os_path_isfile.return_value = False
+
         relations.upgrade_charm()
         self.leader_set.assert_not_called()
         os_path_isfile.return_value = True
@@ -150,6 +157,8 @@ class HeatRelationTests(CharmTestCase):
             self.leader_set.assert_called_once_with(
                 {'heat-auth-encryption-key': 'abc'})
             os_remove.assert_called_once_with(filename)
+        self.remove_old_packages.assert_called_with()
+        self.service_restart.assert_called_with('heat-api')
 
     def test_db_joined(self):
         self.get_relation_ip.return_value = '192.168.20.1'

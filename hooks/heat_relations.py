@@ -42,6 +42,7 @@ from charmhelpers.core.host import (
     restart_on_change,
     service_reload,
     pwgen,
+    service_restart,
 )
 
 from charmhelpers.fetch import (
@@ -92,6 +93,8 @@ from heat_utils import (
     pause_unit_helper,
     resume_unit_helper,
     assess_status,
+    remove_old_packages,
+    services,
 )
 
 from heat_context import (
@@ -161,6 +164,11 @@ def config_changed():
 @hooks.hook('upgrade-charm')
 @harden()
 def upgrade_charm():
+    apt_install(determine_packages(), fatal=True)
+    if remove_old_packages():
+        log("Package purge detected, restarting services", "INFO")
+        for s in services():
+            service_restart(s)
     if is_leader():
         # if we are upgrading, then the old version might have used the
         # HEAT_PATH/encryption-key. So we grab the key from that, and put it in

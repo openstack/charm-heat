@@ -232,6 +232,18 @@ def determine_purge_packages():
     return []
 
 
+def remove_old_packages():
+    '''Purge any packages that need ot be removed.
+
+    :returns: bool Whether packages were removed.
+    '''
+    installed_packages = filter_missing_packages(determine_purge_packages())
+    if installed_packages:
+        apt_purge(installed_packages, fatal=True)
+        apt_autoremove(purge=True, fatal=True)
+    return bool(installed_packages)
+
+
 def do_openstack_upgrade(configs):
     """Perform an uprade of heat.
 
@@ -256,10 +268,7 @@ def do_openstack_upgrade(configs):
     apt_upgrade(options=dpkg_opts, fatal=True, dist=True)
     apt_install(packages=determine_packages(), options=dpkg_opts, fatal=True)
 
-    installed_packages = filter_missing_packages(determine_purge_packages())
-    if installed_packages:
-        apt_purge(installed_packages, fatal=True)
-        apt_autoremove(purge=True, fatal=True)
+    remove_old_packages()
 
     # set CONFIGS to load templates from new release and regenerate config
     configs.set_release(openstack_release=new_os_rel)
