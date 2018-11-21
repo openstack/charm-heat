@@ -100,9 +100,10 @@ from heat_context import (
     HEAT_PATH,
 )
 
+from charmhelpers.contrib.charmsupport import nrpe
+from charmhelpers.contrib.hardening.harden import harden
 from charmhelpers.contrib.openstack.context import ADDRESS_TYPES
 from charmhelpers.payload.execd import execd_preinstall
-from charmhelpers.contrib.hardening.harden import harden
 
 from charmhelpers.contrib.openstack.cert_utils import (
     get_certificate_request,
@@ -164,6 +165,7 @@ def config_changed():
 
     CONFIGS.write_all()
     configure_https()
+    update_nrpe_config()
 
     for rid in relation_ids('cluster'):
         cluster_joined(relation_id=rid)
@@ -206,6 +208,8 @@ def upgrade_charm():
                 # now we just delete the file
                 os.remove(encryption_path)
     leader_elected()
+    update_nrpe_config()
+
     # call the policy overrides handler which will install any policy overrides
     policyd.maybe_do_policyd_overrides(
         os_release('heat-common'),
@@ -438,6 +442,20 @@ def post_series_upgrade():
     log("Running complete series upgrade hook", "INFO")
     series_upgrade_complete(
         resume_unit_helper, CONFIGS)
+
+
+@hooks.hook('nrpe-external-master-relation-joined',
+            'nrpe-external-master-relation-changed')
+def update_nrpe_config():
+    # python-dbus is used by check_upstart_job
+    apt_install('python-dbus')
+    hostname = nrpe.get_nagios_hostname()
+    current_unit = nrpe.get_nagios_unit_name()
+    nrpe_setup = nrpe.NRPE(hostname=hostname)
+    nrpe.copy_nrpe_checks()
+    nrpe.add_init_service_checks(nrpe_setup, services(), current_unit)
+    nrpe.add_haproxy_checks(nrpe_setup, current_unit)
+    nrpe_setup.write()
 
 
 def main():

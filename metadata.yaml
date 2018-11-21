@@ -18,6 +18,10 @@ extra-bindings:
   public:
   admin:
   internal:
+provides:
+  nrpe-external-master:
+    interface: nrpe-external-master
+    scope: container
 requires:
   shared-db:
     interface: mysql-shared

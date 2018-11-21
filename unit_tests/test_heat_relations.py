@@ -111,10 +111,12 @@ class HeatRelationTests(CharmTestCase):
     @patch.object(relations, 'configure_https')
     @patch.object(relations.policyd,
                   'maybe_do_policyd_overrides_on_config_changed')
+    @patch.object(relations, 'update_nrpe_config')
     def test_config_changed_no_upgrade(
         self,
+        mock_update_nrpe_config,
         maybe_do_policyd_overrides_on_config_changed,
-        mock_configure_https
+        mock_configure_https,
     ):
         self.openstack_upgrade_available.return_value = False
         relations.config_changed()
@@ -122,8 +124,10 @@ class HeatRelationTests(CharmTestCase):
     @patch.object(relations, 'configure_https')
     @patch.object(relations.policyd,
                   'maybe_do_policyd_overrides_on_config_changed')
+    @patch.object(relations, 'update_nrpe_config')
     def test_config_changed_with_upgrade(
         self,
+        mock_update_nrpe_config,
         maybe_do_policyd_overrides_on_config_changed,
         mock_configure_https
     ):
@@ -134,8 +138,10 @@ class HeatRelationTests(CharmTestCase):
     @patch.object(relations, 'configure_https')
     @patch.object(relations.policyd,
                   'maybe_do_policyd_overrides_on_config_changed')
+    @patch.object(relations, 'update_nrpe_config')
     def test_config_changed_with_openstack_upgrade_action(
         self,
+        mock_update_nrpe_config,
         maybe_do_policyd_overrides_on_config_changed,
         mock_configure_https
     ):
@@ -150,7 +156,9 @@ class HeatRelationTests(CharmTestCase):
     @patch('os.remove')
     @patch.object(relations, 'leader_elected')
     @patch.object(relations.policyd, 'maybe_do_policyd_overrides')
+    @patch.object(relations, 'update_nrpe_config')
     def test_upgrade_charm(self,
+                           mock_update_nrpe_config,
                            mock_maybe_do_policyd_overrides,
                            leader_elected, os_remove, os_path_isfile):
         os_path_isfile.return_value = False
@@ -353,3 +361,30 @@ class HeatRelationTests(CharmTestCase):
         relations.ha_joined(relation_id='rid:23')
         self.relation_set.assert_called_once_with(
             relation_id='rid:23', rel_data='data')
+
+    @patch.object(relations, "apt_install")
+    @patch.object(relations.nrpe, "get_nagios_hostname")
+    @patch.object(relations.nrpe, "get_nagios_unit_name")
+    @patch.object(relations.nrpe, "NRPE")
+    @patch.object(relations.nrpe, "copy_nrpe_checks")
+    @patch.object(relations.nrpe, "add_init_service_checks")
+    @patch.object(relations.nrpe, "add_haproxy_checks")
+    def test_update_nrpe_config(self, mock_add_haproxy, mock_add_init_svc,
+                                mock_copy_nrpe_checks, mock_nrpe,
+                                mock_nagios_unitname, mock_nagios_hostname,
+                                mock_apt_install):
+        relations.update_nrpe_config()
+        mock_apt_install.assert_called_once_with("python-dbus")
+        mock_nagios_hostname.assert_called_once_with()
+        mock_nagios_unitname.assert_called_once_with()
+        mock_nrpe.assert_called_once_with(
+            hostname=mock_nagios_hostname.return_value)
+        mock_copy_nrpe_checks.assert_called_once_with()
+        mock_add_init_svc.assert_called_once_with(
+            mock_nrpe.return_value,
+            relations.services(),
+            mock_nagios_unitname.return_value,
+        )
+        mock_add_haproxy.assert_called_once_with(
+            mock_nrpe.return_value, mock_nagios_unitname.return_value)
+        mock_nrpe.return_value.write.assert_called_once_with()

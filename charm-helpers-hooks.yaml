@@ -5,6 +5,7 @@ include:
     - osplatform
     - cli
     - fetch
+    - contrib.charmsupport
     - contrib.openstack|inc=*
     - contrib.python
     - contrib.storage
