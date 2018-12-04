@@ -63,7 +63,7 @@ TO_PATCH = [
     'charm_dir',
     'sync_db_with_multi_ipv6_addresses',
     # charmhelpers.contrib.openstack.ha.utils
-    'update_dns_ha_resource_params',
+    'generate_ha_relation_data',
     # charmhelpers.contrib.hahelpers.cluster_utils
     # heat_utils
     'restart_map',
@@ -79,10 +79,7 @@ TO_PATCH = [
     'relation_ids',
     'relation_get',
     'local_unit',
-    'get_hacluster_config',
-    'get_iface_for_address',
     'get_relation_ip',
-    'get_netmask_for_address',
 ]
 
 
@@ -327,64 +324,8 @@ class HeatRelationTests(CharmTestCase):
         relations.db_changed()
         self.assertFalse(self.migrate_database.called)
 
-    @patch.object(relations, 'CONFIGS')
-    def test_ha_joined(self, configs):
-        self.get_hacluster_config.return_value = {
-            'ha-bindiface': 'eth0',
-            'ha-mcastport': '5959',
-            'vip': '10.5.105.3'
-        }
-        self.get_iface_for_address.return_value = 'eth0'
-        self.get_netmask_for_address.return_value = '255.255.255.0'
-        relations.ha_joined()
-        expected = {
-            'relation_id': None,
-            'init_services': {'res_heat_haproxy': 'haproxy'},
-            'corosync_bindiface': 'eth0',
-            'corosync_mcastport': '5959',
-            'resources': {
-                'res_heat_haproxy': 'lsb:haproxy',
-                'res_heat_eth0_vip': 'ocf:heartbeat:IPaddr2'},
-            'resource_params': {
-                'res_heat_haproxy': 'op monitor interval="5s"',
-                'res_heat_eth0_vip': ('params ip="10.5.105.3" '
-                                      'cidr_netmask="255.255.255.0" '
-                                      'nic="eth0"')},
-            'clones': {'cl_heat_haproxy': 'res_heat_haproxy'}
-        }
-        self.relation_set.assert_called_with(**expected)
-
-    def test_ha_joined_dns_ha(self):
-        def _fake_update(resources, resource_params, relation_id=None):
-            resources.update({'res_heat_public_hostname': 'ocf:maas:dns'})
-            resource_params.update({'res_heat_public_hostname':
-                                    'params fqdn="keystone.maas" '
-                                    'ip_address="10.0.0.1"'})
-
-        self.test_config.set('dns-ha', True)
-        self.get_hacluster_config.return_value = {
-            'vip': None,
-            'ha-bindiface': 'em0',
-            'ha-mcastport': '8080',
-            'os-admin-hostname': None,
-            'os-internal-hostname': None,
-            'os-public-hostname': 'keystone.maas',
-        }
-        args = {
-            'relation_id': None,
-            'corosync_bindiface': 'em0',
-            'corosync_mcastport': '8080',
-            'init_services': {'res_heat_haproxy': 'haproxy'},
-            'resources': {'res_heat_public_hostname': 'ocf:maas:dns',
-                          'res_heat_haproxy': 'lsb:haproxy'},
-            'resource_params': {
-                'res_heat_public_hostname': 'params fqdn="keystone.maas" '
-                                            'ip_address="10.0.0.1"',
-                'res_heat_haproxy': 'op monitor interval="5s"'},
-            'clones': {'cl_heat_haproxy': 'res_heat_haproxy'}
-        }
-        self.update_dns_ha_resource_params.side_effect = _fake_update
-
-        relations.ha_joined()
-        self.assertTrue(self.update_dns_ha_resource_params.called)
-        self.relation_set.assert_called_with(**args)
+    def test_ha_relation_joined(self):
+        self.generate_ha_relation_data.return_value = {'rel_data': 'data'}
+        relations.ha_joined(relation_id='rid:23')
+        self.relation_set.assert_called_once_with(
+            relation_id='rid:23', rel_data='data')
