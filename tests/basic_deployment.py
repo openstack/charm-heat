@@ -547,10 +547,11 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
         u.log.debug('rabbitmq:heat relation: {}'.format(rmq_rel))
         u.log.debug('percona-cluster:heat relation: {}'.format(mysql_rel))
 
-        db_uri = "mysql://{}:{}@{}/{}".format('heat',
-                                              mysql_rel['heat_password'],
-                                              mysql_rel['db_host'],
-                                              'heat')
+        db_uri = "{}://{}:{}@{}/{}".format('mysql+pymysql',
+                                           'heat',
+                                           mysql_rel['heat_password'],
+                                           mysql_rel['db_host'],
+                                           'heat')
 
         expected = {
             'DEFAULT': {
