@@ -547,7 +547,11 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
         u.log.debug('rabbitmq:heat relation: {}'.format(rmq_rel))
         u.log.debug('percona-cluster:heat relation: {}'.format(mysql_rel))
 
-        db_uri = "{}://{}:{}@{}/{}".format('mysql+pymysql',
+        if self._get_openstack_release() < self.bionic_stein:
+            dialect = 'mysql'
+        else:
+            dialect = 'mysql+pymysql'
+        db_uri = "{}://{}:{}@{}/{}".format(dialect,
                                            'heat',
                                            mysql_rel['heat_password'],
                                            mysql_rel['db_host'],
