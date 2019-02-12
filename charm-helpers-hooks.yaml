@@ -6,7 +6,7 @@ include:
     - cli
     - fetch
     - contrib.openstack|inc=*
-    - contrib.python.packages
+    - contrib.python
     - contrib.storage
     - contrib.network.ip
     - contrib.hahelpers:
