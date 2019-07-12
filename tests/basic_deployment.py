@@ -79,7 +79,7 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
         other_services = [
             {'name': 'keystone'},
             {'name': 'rabbitmq-server'},
-            {'name': 'percona-cluster', 'constraints': {'mem': '3072M'}},
+            self.get_percona_service_entry(),
             {'name': 'glance'},
             {'name': 'nova-cloud-controller'},
             {'name': 'nova-compute'}
