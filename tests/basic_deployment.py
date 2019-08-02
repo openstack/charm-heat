@@ -547,7 +547,7 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
         u.log.debug('rabbitmq:heat relation: {}'.format(rmq_rel))
         u.log.debug('percona-cluster:heat relation: {}'.format(mysql_rel))
 
-        if self._get_openstack_release() < self.bionic_stein:
+        if self._get_openstack_release() < self.xenial_queens:
             dialect = 'mysql'
         else:
             dialect = 'mysql+pymysql'
