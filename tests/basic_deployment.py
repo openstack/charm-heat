@@ -50,7 +50,7 @@ class HeatBasicDeployment(OpenStackAmuletDeployment):
     """Amulet tests on a basic heat deployment."""
 
     def __init__(self, series=None, openstack=None, source=None,
-                 stable=False):
+                 stable=True):
         """Deploy the entire test environment."""
         super(HeatBasicDeployment, self).__init__(series, openstack,
                                                   source, stable)
