@@ -10,8 +10,8 @@ tags:
 series:
   - xenial
   - bionic
-  - cosmic
   - disco
+  - eoan
   - trusty
 extra-bindings:
   public:
