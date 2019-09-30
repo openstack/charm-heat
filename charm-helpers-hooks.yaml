@@ -14,3 +14,4 @@ include:
         - cluster
     - payload.execd
     - contrib.hardening|inc=*
+    - contrib.openstack.policyd
