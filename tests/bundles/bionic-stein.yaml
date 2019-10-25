@@ -1,0 +1,105 @@
+series: bionic
+applications:
+  percona-cluster:
+    charm: cs:~openstack-charmers-next/percona-cluster
+    num_units: 1
+    options:
+      innodb-buffer-pool-size: 256M
+      dataset-size: 25%
+      max-connections: 1000
+      source: cloud:bionic-stein
+  keystone:
+    charm: cs:~openstack-charmers-next/keystone
+    num_units: 1
+    options:
+      openstack-origin: cloud:bionic-stein
+  rabbitmq-server:
+    charm: cs:~openstack-charmers-next/rabbitmq-server
+    num_units: 1
+    options:
+      source: cloud:bionic-stein
+  glance:
+    charm: cs:~openstack-charmers-next/glance
+    num_units: 1
+    options:
+      openstack-origin: cloud:bionic-stein
+  nova-cloud-controller:
+    charm: cs:~openstack-charmers-next/nova-cloud-controller
+    num_units: 1
+    options:
+      openstack-origin: cloud:bionic-stein
+      api-rate-limit-rules: "( POST, '*', .*, 9999, MINUTE );"
+      network-manager: Neutron
+  nova-compute:
+    charm: cs:~openstack-charmers-next/nova-compute
+    num_units: 1
+    options:
+      openstack-origin: cloud:bionic-stein
+      config-flags: 'auto_assign_floating_ip=False'
+      enable-live-migration: "False"
+  neutron-gateway:
+    charm: cs:~openstack-charmers-next/neutron-gateway
+    num_units: 1
+    options:
+      openstack-origin: cloud:bionic-stein
+  neutron-api:
+    charm: cs:~openstack-charmers-next/neutron-api
+    num_units: 1
+    options:
+      openstack-origin: cloud:bionic-stein
+  neutron-openvswitch:
+    charm: cs:~openstack-charmers-next/neutron-openvswitch
+  heat:
+    charm: ../../../heat
+    num_units: 2
+    series: bionic
+    constraints: mem=2048
+    options:
+      openstack-origin: cloud:bionic-stein
+      debug: "True"
+      verbose: "True"
+relations:
+  - - heat:amqp
+    - rabbitmq-server:amqp
+  - - heat:identity-service
+    - keystone:identity-service
+  - - heat:shared-db
+    - percona-cluster:shared-db
+  - - nova-compute:image-service
+    - glance:image-service
+  - - nova-compute:amqp
+    - rabbitmq-server:amqp
+  - - nova-cloud-controller:shared-db
+    - percona-cluster:shared-db
+  - - nova-cloud-controller:identity-service
+    - keystone:identity-service
+  - - nova-cloud-controller:amqp
+    - rabbitmq-server:amqp
+  - - nova-cloud-controller:cloud-compute
+    - nova-compute:cloud-compute
+  - - nova-cloud-controller:image-service
+    - glance:image-service
+  - - keystone:shared-db
+    - percona-cluster:shared-db
+  - - glance:identity-service
+    - keystone:identity-service
+  - - glance:shared-db
+    - percona-cluster:shared-db
+  - - glance:amqp
+    - rabbitmq-server:amqp
+  - - neutron-gateway:amqp
+    - rabbitmq-server:amqp
+  - - nova-cloud-controller:quantum-network-service
+    - neutron-gateway:quantum-network-service
+  - - neutron-api:shared-db
+    - percona-cluster:shared-db
+  - - neutron-api:amqp
+    - rabbitmq-server:amqp
+  - - neutron-api:neutron-api
+    - nova-cloud-controller:neutron-api
+  - - neutron-api:identity-service
+    - keystone:identity-service
+  - - nova-compute:neutron-plugin
+    - neutron-openvswitch:neutron-plugin
+  - - rabbitmq-server:amqp
+    - neutron-openvswitch:amqp

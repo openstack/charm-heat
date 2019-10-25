@@ -6,11 +6,11 @@ lint:
 
 test:
 	@echo Starting unit tests...
-	@tox -e py27
+	@tox -e py3
 
 functional_test:
-	@echo Starting Amulet tests...
-	@tox -e py27
+	@echo Starting Zaza tests...
+	@tox -e func
 
 bin/charm_helpers_sync.py:
 	@mkdir -p bin
