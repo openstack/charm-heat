@@ -4,7 +4,7 @@ configure:
   - zaza.openstack.charm_tests.nova.setup.manage_ssh_key
   - zaza.openstack.charm_tests.nova.setup.create_flavors
 smoke_bundles:
-  - bionic-stein
+  - bionic-train
 gate_bundles:
   - trusty-mitaka
   - xenial-mitaka
