@@ -112,6 +112,7 @@ HEAT_DIR = '/etc/heat'
 HEAT_CONF = '/etc/heat/heat.conf'
 HEAT_API_PASTE = '/etc/heat/api-paste.ini'
 HAPROXY_CONF = '/etc/haproxy/haproxy.cfg'
+APACHE_PORTS_CONF = '/etc/apache2/ports.conf'
 HTTPS_APACHE_CONF = '/etc/apache2/sites-available/openstack_https_frontend'
 HTTPS_APACHE_24_CONF = os.path.join('/etc/apache2/sites-available',
                                     'openstack_https_frontend.conf')
@@ -163,6 +164,10 @@ CONFIG_FILES = OrderedDict([
     (MEMCACHED_CONF, {
         'contexts': [context.MemcacheContext()],
         'services': ['memcached'],
+    }),
+    (APACHE_PORTS_CONF, {
+        'contexts': [],
+        'services': ['apache2'],
     }),
 ])
 

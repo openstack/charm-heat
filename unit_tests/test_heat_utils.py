@@ -54,6 +54,7 @@ RESTART_MAP = OrderedDict([
     ('/etc/apache2/sites-available/openstack_https_frontend.conf',
      ['apache2']),
     ('/etc/memcached.conf', ['memcached']),
+    ('/etc/apache2/ports.conf', ['apache2']),
 ])
 
 
