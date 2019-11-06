@@ -58,7 +58,7 @@ applications:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
   heat:
     charm: ../../../heat
-    num_units: 2
+    num_units: 1
     series: bionic
     constraints: mem=2048
     options:

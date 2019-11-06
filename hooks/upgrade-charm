@@ -1,1 +1,30 @@
-heat_relations.py
+#!/bin/bash -e
+# Wrapper to deal with newer Ubuntu versions that don't have py2 installed
+# by default.
+
+declare -a DEPS=('apt' 'netaddr' 'netifaces' 'pip' 'yaml' 'dnspython' 'openstackclient')
+
+# drop this when trusty support is ended.  Only need python3 at that point
+release=$(lsb_release -c -s)
+if [ "$release" == "trusty" ]; then
+    PYTHON="python"
+else
+    PYTHON="python3"
+    # if python-openstackclient is installed then remove it
+    if dpkg -s python-openstackclient 2>&1 > /dev/null; then
+        apt purge -y python-openstackclient
+    fi
+fi
+
+check_and_install() {
+    pkg="${1}-${2}"
+    if ! dpkg -s ${pkg} 2>&1 > /dev/null; then
+        apt-get -y install ${pkg}
+    fi
+}
+
+for dep in ${DEPS[@]}; do
+    check_and_install ${PYTHON} ${dep}
+done
+
+exec ./hooks/upgrade-charm.real

@@ -35,3 +35,8 @@ requires:
 peers:
   cluster:
     interface: heat-ha
+resources:
+  policyd-override:
+    type: file
+    filename: policyd-override.zip
+    description: The policy.d overrides file

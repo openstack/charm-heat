@@ -61,9 +61,10 @@ from charmhelpers.contrib.network.ip import (
 from charmhelpers.contrib.openstack.utils import (
     configure_installation_source,
     openstack_upgrade_available,
-    sync_db_with_multi_ipv6_addresses,
-    series_upgrade_prepare,
+    os_release,
     series_upgrade_complete,
+    series_upgrade_prepare,
+    sync_db_with_multi_ipv6_addresses,
 )
 
 from charmhelpers.contrib.openstack.ha.utils import (
@@ -107,6 +108,8 @@ from charmhelpers.contrib.openstack.cert_utils import (
     process_certificates,
 )
 
+import charmhelpers.contrib.openstack.policyd as policyd
+
 hooks = Hooks()
 CONFIGS = register_configs()
 
@@ -130,6 +133,16 @@ def install():
 
     for port in API_PORTS.values():
         open_port(port)
+    # call the policy overrides handler which will install any policy overrides
+    policyd.maybe_do_policyd_overrides(
+        os_release('heat-common'),
+        'heat',
+        restart_handler=restart_heat_api,
+    )
+
+
+def restart_heat_api():
+    service_restart('heat-api')
 
 
 @hooks.hook('config-changed')
@@ -156,8 +169,15 @@ def config_changed():
     for r_id in relation_ids('ha'):
         ha_joined(relation_id=r_id)
 
+    # call the policy overrides handler which will install any policy overrides
+    policyd.maybe_do_policyd_overrides_on_config_changed(
+        os_release('heat-common'),
+        'heat',
+        restart_handler=restart_heat_api,
+    )
 
-@hooks.hook('upgrade-charm')
+
+@hooks.hook('upgrade-charm.real')
 @harden()
 def upgrade_charm():
     apt_install(determine_packages(), fatal=True)
@@ -185,6 +205,12 @@ def upgrade_charm():
                 # now we just delete the file
                 os.remove(encryption_path)
     leader_elected()
+    # call the policy overrides handler which will install any policy overrides
+    policyd.maybe_do_policyd_overrides(
+        os_release('heat-common'),
+        'heat',
+        restart_handler=restart_heat_api,
+    )
 
 
 @hooks.hook('amqp-relation-joined')

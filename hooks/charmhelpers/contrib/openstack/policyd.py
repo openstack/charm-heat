@@ -17,6 +17,7 @@ import contextlib
 import os
 import six
 import shutil
+import sys
 import yaml
 import zipfile
 
@@ -115,8 +116,8 @@ library for further details).
     default: False
     description: |
       If True then use the resource file named 'policyd-override' to install
-      override yaml files in the service's policy.d directory.  The resource
-      file should be a zip file containing at least one yaml file with a .yaml
+      override YAML files in the service's policy.d directory.  The resource
+      file should be a ZIP file containing at least one yaml file with a .yaml
       or .yml extension.  If False then remove the overrides.
 """
 
@@ -134,14 +135,14 @@ resources:
 Policy Overrides
 ----------------
 
-This service allows for policy overrides using the `policy.d` directory.  This
-is an **advanced** feature and the policies that the service supports should be
-clearly and unambiguously understood before trying to override, or add to, the
-default policies that the service uses.
+This feature allows for policy overrides using the `policy.d` directory.  This
+is an **advanced** feature and the policies that the OpenStack service supports
+should be clearly and unambiguously understood before trying to override, or
+add to, the default policies that the service uses.  The charm also has some
+policy defaults.  They should also be understood before being overridden.
 
-The charm also has some policy defaults.  They should also be understood before
-being overridden.  It is possible to break the system (for tenants and other
-services) if policies are incorrectly applied to the service.
+> **Caution**: It is possible to break the system (for tenants and other
+  services) if policies are incorrectly applied to the service.
 
 Policy overrides are YAML files that contain rules that will add to, or
 override, existing policy rules in the service.  The `policy.d` directory is
@@ -149,30 +150,16 @@ a place to put the YAML override files.  This charm owns the
 `/etc/keystone/policy.d` directory, and as such, any manual changes to it will
 be overwritten on charm upgrades.
 
-Policy overrides are provided to the charm using a resource file called
-`policyd-override`.  This is attached to the charm using (for example):
+Overrides are provided to the charm using a Juju resource called
+`policyd-override`.  The resource is a ZIP file.  This file, say
+`overrides.zip`, is attached to the charm by:
 
-    juju attach-resource <charm-name> policyd-override=<some-file>
 
-The `<charm-name>` is the name that this charm is deployed as, with
-`<some-file>` being the resource file containing the policy overrides.
+    juju attach-resource <charm-name> policyd-override=overrides.zip
 
-The format of the resource file is a ZIP file (.zip extension) containing at
-least one YAML file with an extension of `.yaml` or `.yml`.  Note that any
-directories in the ZIP file are ignored; all of the files are flattened into a
-single directory.  There must not be any duplicated filenames; this will cause
-an error and nothing in the resource file will be applied.
+The policy override is enabled in the charm using:
 
-(ed. next part is optional is the charm supports some form of
-template/substitution on a read file)
-
-If a (ed. "one or more of") [`.j2`, `.tmpl`, `.tpl`] file is found in the
-resource file then the charm will perform a substitution with charm variables
-taken from the config or relations.  (ed. edit as appropriate to include the
-variable).
-
-To enable the policy overrides the config option `use-policyd-override` must be
-set to `True`.
+    juju config <charm-name> use-policyd-override=true
 
 When `use-policyd-override` is `True` the status line of the charm will be
 prefixed with `PO:` indicating that policies have been overridden.  If the
@@ -180,12 +167,8 @@ installation of the policy override YAML files failed for any reason then the
 status line will be prefixed with `PO (broken):`.  The log file for the charm
 will indicate the reason.  No policy override files are installed if the `PO
 (broken):` is shown.  The status line indicates that the overrides are broken,
-not that the policy for the service has failed - they will be the defaults for
-the charm and service.
-
-If the policy overrides did not install then *either* attach a new, corrected,
-resource file *or* disable the policy overrides by setting
-`use-policyd-override` to False.
+not that the policy for the service has failed. The policy will be the defaults
+for the charm and service.
 
 Policy overrides on one service may affect the functionality of another
 service. Therefore, it may be necessary to provide policy overrides for
@@ -296,15 +279,28 @@ def maybe_do_policyd_overrides(openstack_release,
                             restarted.
     :type restart_handler: Union[None, Callable[]]
     """
+    hookenv.log("Running maybe_do_policyd_overrides",
+                level=POLICYD_LOG_LEVEL_DEFAULT)
+    if not is_policyd_override_valid_on_this_release(openstack_release):
+        hookenv.log("... policy overrides not valid on this release: {}"
+                    .format(openstack_release),
+                    level=POLICYD_LOG_LEVEL_DEFAULT)
+        return
     config = hookenv.config()
     try:
         if not config.get(POLICYD_CONFIG_NAME, False):
-            remove_policy_success_file()
             clean_policyd_dir_for(service, blacklist_paths)
+            if (os.path.isfile(_policy_success_file()) and
+                    restart_handler is not None and
+                    callable(restart_handler)):
+                restart_handler()
+            remove_policy_success_file()
             return
-    except Exception:
-        return
-    if not is_policyd_override_valid_on_this_release(openstack_release):
+    except Exception as e:
+        hookenv.log("... ERROR: Exception is: {}".format(str(e)),
+                    level=POLICYD_CONFIG_NAME)
+        import traceback
+        hookenv.log(traceback.format_exc(), level=POLICYD_LOG_LEVEL_DEFAULT)
         return
     # from now on it should succeed; if it doesn't then status line will show
     # broken.
@@ -345,16 +341,30 @@ def maybe_do_policyd_overrides_on_config_changed(openstack_release,
                             restarted.
     :type restart_handler: Union[None, Callable[]]
     """
+    if not is_policyd_override_valid_on_this_release(openstack_release):
+        return
+    hookenv.log("Running maybe_do_policyd_overrides_on_config_changed",
+                level=POLICYD_LOG_LEVEL_DEFAULT)
     config = hookenv.config()
     try:
         if not config.get(POLICYD_CONFIG_NAME, False):
-            remove_policy_success_file()
             clean_policyd_dir_for(service, blacklist_paths)
+            if (os.path.isfile(_policy_success_file()) and
+                    restart_handler is not None and
+                    callable(restart_handler)):
+                restart_handler()
+            remove_policy_success_file()
             return
-    except Exception:
+    except Exception as e:
+        hookenv.log("... ERROR: Exception is: {}".format(str(e)),
+                    level=POLICYD_CONFIG_NAME)
+        import traceback
+        hookenv.log(traceback.format_exc(), level=POLICYD_LOG_LEVEL_DEFAULT)
         return
     # if the policyd overrides have been performed just return
     if os.path.isfile(_policy_success_file()):
+        hookenv.log("... already setup, so skipping.",
+                    level=POLICYD_LOG_LEVEL_DEFAULT)
         return
     maybe_do_policyd_overrides(
         openstack_release, service, blacklist_paths, blacklist_keys,
@@ -430,8 +440,13 @@ def _yamlfiles(zipfile):
     """
     l = []
     for infolist_item in zipfile.infolist():
-        if infolist_item.is_dir():
-            continue
+        try:
+            if infolist_item.is_dir():
+                continue
+        except AttributeError:
+            # fallback to "old" way to determine dir entry for pre-py36
+            if infolist_item.filename.endswith('/'):
+                continue
         _, name_ext = os.path.split(infolist_item.filename)
         name, ext = os.path.splitext(name_ext)
         ext = ext.lower()
@@ -511,7 +526,7 @@ def clean_policyd_dir_for(service, keep_paths=None):
     path = policyd_dir_for(service)
     if not os.path.exists(path):
         ch_host.mkdir(path, owner=service, group=service, perms=0o775)
-    _scanner = os.scandir if six.PY3 else _py2_scandir
+    _scanner = os.scandir if sys.version_info > (3, 4) else _py2_scandir
     for direntry in _scanner(path):
         # see if the path should be kept.
         if direntry.path in keep_paths:
@@ -641,6 +656,7 @@ def process_policy_resource_file(resource_file,
     :returns: True if the processing was successful, False if not.
     :rtype: boolean
     """
+    hookenv.log("Running process_policy_resource_file", level=hookenv.DEBUG)
     blacklist_paths = blacklist_paths or []
     completed = False
     try:

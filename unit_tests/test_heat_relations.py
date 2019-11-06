@@ -57,10 +57,11 @@ TO_PATCH = [
     'restart_on_change',
     'service_restart',
     # charmhelpers.contrib.openstack.utils
-    'configure_installation_source',
-    'openstack_upgrade_available',
-    'determine_packages',
     'charm_dir',
+    'configure_installation_source',
+    'determine_packages',
+    'openstack_upgrade_available',
+    'os_release',
     'sync_db_with_multi_ipv6_addresses',
     # charmhelpers.contrib.openstack.ha.utils
     'generate_ha_relation_data',
@@ -90,7 +91,8 @@ class HeatRelationTests(CharmTestCase):
         self.config.side_effect = self.test_config.get
         self.charm_dir.return_value = '/var/lib/juju/charms/heat/charm'
 
-    def test_install_hook(self):
+    @patch.object(relations.policyd, 'maybe_do_policyd_overrides')
+    def test_install_hook(self, mock_maybe_do_policyd_overrides):
         repo = 'cloud:precise-havana'
         self.determine_packages.return_value = [
             'python-keystoneclient', 'uuid', 'heat-api',
@@ -106,20 +108,36 @@ class HeatRelationTests(CharmTestCase):
         self.assertTrue(self.execd_preinstall.called)
 
     @patch.object(relations, 'configure_https')
-    def test_config_changed_no_upgrade(self, mock_configure_https):
+    @patch.object(relations.policyd,
+                  'maybe_do_policyd_overrides_on_config_changed')
+    def test_config_changed_no_upgrade(
+        self,
+        maybe_do_policyd_overrides_on_config_changed,
+        mock_configure_https
+    ):
         self.openstack_upgrade_available.return_value = False
         relations.config_changed()
 
     @patch.object(relations, 'configure_https')
-    def test_config_changed_with_upgrade(self, mock_configure_https):
+    @patch.object(relations.policyd,
+                  'maybe_do_policyd_overrides_on_config_changed')
+    def test_config_changed_with_upgrade(
+        self,
+        maybe_do_policyd_overrides_on_config_changed,
+        mock_configure_https
+    ):
         self.openstack_upgrade_available.return_value = True
         relations.config_changed()
         self.assertTrue(self.do_openstack_upgrade.called)
 
     @patch.object(relations, 'configure_https')
+    @patch.object(relations.policyd,
+                  'maybe_do_policyd_overrides_on_config_changed')
     def test_config_changed_with_openstack_upgrade_action(
-            self,
-            mock_configure_https):
+        self,
+        maybe_do_policyd_overrides_on_config_changed,
+        mock_configure_https
+    ):
         self.openstack_upgrade_available.return_value = True
         self.test_config.set('action-managed-upgrade', True)
 
@@ -130,7 +148,10 @@ class HeatRelationTests(CharmTestCase):
     @patch('os.path.isfile')
     @patch('os.remove')
     @patch.object(relations, 'leader_elected')
-    def test_upgrade_charm(self, leader_elected, os_remove, os_path_isfile):
+    @patch.object(relations.policyd, 'maybe_do_policyd_overrides')
+    def test_upgrade_charm(self,
+                           mock_maybe_do_policyd_overrides,
+                           leader_elected, os_remove, os_path_isfile):
         os_path_isfile.return_value = False
         self.is_leader.return_value = False
         self.remove_old_packages.return_value = True

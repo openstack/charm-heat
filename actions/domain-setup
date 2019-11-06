@@ -4,8 +4,6 @@ set -e
 
 . /root/admin-openrc-v3
 
-dpkg -l | grep python-openstackclient || apt-get install -y python-openstackclient
-
 openstack domain show heat || {
     openstack domain create --description "Stack projects and users" heat
 }

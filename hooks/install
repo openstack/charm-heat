@@ -2,7 +2,15 @@
 # Wrapper to deal with newer Ubuntu versions that don't have py2 installed
 # by default.
 
-declare -a DEPS=('apt' 'netaddr' 'netifaces' 'pip' 'yaml' 'dnspython')
+declare -a DEPS=('apt' 'netaddr' 'netifaces' 'pip' 'yaml' 'dnspython' 'openstackclient')
+
+# drop this when trusty support is ended.  Only need python3 at that point
+release=$(lsb_release -c -s)
+if [ "$release" == "trusty" ]; then
+    PYTHON="python"
+else
+    PYTHON="python3"
+fi
 
 check_and_install() {
     pkg="${1}-${2}"
@@ -10,8 +18,6 @@ check_and_install() {
         apt-get -y install ${pkg}
     fi
 }
-
-PYTHON="python"
 
 for dep in ${DEPS[@]}; do
     check_and_install ${PYTHON} ${dep}
