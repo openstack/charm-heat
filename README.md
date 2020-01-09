@@ -1,5 +1,4 @@
-Overview
-========
+# Overview
 
 Heat is the main project in the OpenStack Orchestration program. It implements
 an orchestration engine to launch multiple composite cloud applications based
@@ -7,8 +6,7 @@ on templates in the form of text files that can be treated like code.
 
 This charm deploys the Heat infrastructure.
 
-Usage
-=====
+# Usage
 
 Heat requires the existence of the other core OpenStack services deployed via
 Juju charms, specifically: mysql, rabbitmq-server, keystone and
@@ -28,8 +26,7 @@ If using juju 1.x run:
 
 This is only required for >= OpenStack Kilo.
 
-HA/Clustering
--------------
+## HA/Clustering
 
 There are two mutually exclusive high availability options: using virtual
 IP(s) or DNS. In both cases, a relationship to hacluster is required which
@@ -62,21 +59,30 @@ If both 'vip' and 'dns-ha' are set as they are mutually exclusive
 If 'dns-ha' is set and none of the os-{admin,internal,public}-hostname(s) are
 set
 
-Network Space support
----------------------
+## Spaces
 
-This charm supports the use of Juju Network Spaces, allowing the charm to be bound to network space configurations managed directly by Juju.  This is only supported with Juju 2.0 and above.
+This charm supports the use of Juju Network Spaces, allowing the charm to be
+bound to network space configurations managed directly by Juju.  This is only
+supported with Juju 2.0 and above.
 
-API endpoints can be bound to distinct network spaces supporting the network separation of public, internal and admin endpoints.
+API endpoints can be bound to distinct network spaces supporting the network
+separation of public, internal and admin endpoints.
 
-Access to the underlying MySQL instance can also be bound to a specific space using the shared-db relation.
+Access to the underlying MySQL instance can also be bound to a specific space
+using the shared-db relation.
 
 To use this feature, use the --bind option when deploying the charm:
 
-    juju deploy heat --bind "public=public-space internal=internal-space admin=admin-space shared-db=internal-space"
+    juju deploy heat --bind \
+       "public=public-space \
+        internal=internal-space \
+        admin=admin-space \
+        shared-db=internal-space"
 
-alternatively these can also be provided as part of a juju native bundle configuration:
+Alternatively, these can also be provided as part of a juju native bundle
+configuration:
 
+```yaml
     heat:
       charm: cs:xenial/heat
       num_units: 1
@@ -85,51 +91,47 @@ alternatively these can also be provided as part of a juju native bundle configu
         admin: admin-space
         internal: internal-space
         shared-db: internal-space
+```
 
-NOTE: Spaces must be configured in the underlying provider prior to attempting to use them.
+NOTE: Spaces must be configured in the underlying provider prior to attempting
+to use them.
 
-NOTE: Existing deployments using os-*-network configuration options will continue to function; these options are preferred over any network space binding provided if set.
+NOTE: Existing deployments using os-*-network configuration options will
+continue to function; these options are preferred over any network space
+binding provided if set.
 
-Policy Overrides
-----------------
+## Policy Overrides
 
-This feature allows for policy overrides using the `policy.d` directory.  This
-is an **advanced** feature and the policies that the OpenStack service supports
-should be clearly and unambiguously understood before trying to override, or
-add to, the default policies that the service uses.  The charm also has some
-policy defaults.  They should also be understood before being overridden.
+Policy overrides is an **advanced** feature that allows an operator to override
+the default policy of an OpenStack service. The policies that the service
+supports, the defaults it implements in its code, and the defaults that a charm
+may include should all be clearly understood before proceeding.
 
 > **Caution**: It is possible to break the system (for tenants and other
   services) if policies are incorrectly applied to the service.
 
-Policy overrides are YAML files that contain rules that will add to, or
-override, existing policy rules in the service.  The `policy.d` directory is
-a place to put the YAML override files.  This charm owns the
-`/etc/heat/policy.d` directory, and as such, any manual changes to it will
-be overwritten on charm upgrades.
+Policy statements are placed in a YAML file. This file (or files) is then (ZIP)
+compressed into a single file and used as an application resource. The override
+is then enabled via a Boolean charm option.
 
-Overrides are provided to the charm using a Juju resource called
-`policyd-override`.  The resource is a ZIP file.  This file, say
-`overrides.zip`, is attached to the charm by:
+Here are the essential commands (filenames are arbitrary):
 
-
+    zip overrides.zip override-file.yaml
     juju attach-resource heat policyd-override=overrides.zip
-
-The policy override is enabled in the charm using:
-
     juju config heat use-policyd-override=true
 
-When `use-policyd-override` is `True` the status line of the charm will be
-prefixed with `PO:` indicating that policies have been overridden.  If the
-installation of the policy override YAML files failed for any reason then the
-status line will be prefixed with `PO (broken):`.  The log file for the charm
-will indicate the reason.  No policy override files are installed if the `PO
-(broken):` is shown.  The status line indicates that the overrides are broken,
-not that the policy for the service has failed. The policy will be the defaults
-for the charm and service.
+See appendix [Policy Overrides][cdg-appendix-n] in the [OpenStack Charms
+Deployment Guide][cdg] for a thorough treatment of this feature.
 
-Policy overrides on one service may affect the functionality of another
-service. Therefore, it may be necessary to provide policy overrides for
-multiple service charms to achieve a consistent set of policies across the
-OpenStack system.  The charms for the other services that may need overrides
-should be checked to ensure that they support overrides before proceeding.
+# Bugs
+
+Please report bugs on [Launchpad][lp-bugs-charm-heat].
+
+For general charm questions refer to the OpenStack [Charm Guide][cg].
+
+<!-- LINKS -->
+
+[cg]: https://docs.openstack.org/charm-guide
+[cdg]: https://docs.openstack.org/project-deploy-guide/charm-deployment-guide
+[cdg-appendix-n]: https://docs.openstack.org/project-deploy-guide/charm-deployment-guide/latest/app-policy-overrides.html
+[lp-bugs-charm-heat]: https://bugs.launchpad.net/charm-heat/+filebug
