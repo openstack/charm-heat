@@ -65,6 +65,7 @@ from charmhelpers.contrib.openstack.utils import (
     series_upgrade_complete,
     series_upgrade_prepare,
     sync_db_with_multi_ipv6_addresses,
+    is_db_maintenance_mode,
 )
 
 from charmhelpers.contrib.openstack.ha.utils import (
@@ -252,6 +253,9 @@ def db_joined():
 @hooks.hook('shared-db-relation-changed')
 @restart_on_change(restart_map())
 def db_changed():
+    if is_db_maintenance_mode():
+        log('Database maintenance mode, aborting hook.')
+        return
     if 'shared-db' not in CONFIGS.complete_contexts():
         log('shared-db relation incomplete. Peer not ready?')
         return

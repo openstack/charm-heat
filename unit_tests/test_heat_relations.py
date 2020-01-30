@@ -81,6 +81,7 @@ TO_PATCH = [
     'relation_get',
     'local_unit',
     'get_relation_ip',
+    'is_db_maintenance_mode',
 ]
 
 
@@ -187,6 +188,7 @@ class HeatRelationTests(CharmTestCase):
         self.assertTrue(self.get_relation_ip.called)
 
     def _shared_db_test(self, configs):
+        self.is_db_maintenance_mode.return_value = False
         self.relation_get.return_value = 'heat/0 heat/1'
         self.local_unit.return_value = 'heat/0'
         configs.complete_contexts = MagicMock()
@@ -203,6 +205,7 @@ class HeatRelationTests(CharmTestCase):
 
     @patch.object(relations, 'CONFIGS')
     def test_db_changed_missing_relation_data(self, configs):
+        self.is_db_maintenance_mode.return_value = False
         configs.complete_contexts = MagicMock()
         configs.complete_contexts.return_value = []
         relations.db_changed()
