@@ -1,5 +1,5 @@
 variables:
-  openstack-origin: &openstack-origin cloud:bionic-train
+  openstack-origin: &openstack-origin cloud:bionic-ussuri
 
 series: &series bionic
 
@@ -11,12 +11,14 @@ machines:
   3: {}
   4: {}
   5:
-    constraints: "root-disk=20G mem=4G"
+    constraints: "root-disk=20G mem=4G cores=4"
   6: {}
   7: {}
   8: {}
-  9: {}
-  10: {}
+  9:
+    constaints: "mem=2048M"
+  10:
+    constaints: "mem=2048M"
 
 # We specify machine placements for these to improve iteration
 # time, given that machine "0" comes up way before machine "7"
@@ -73,9 +75,8 @@ applications:
   placement:
     charm: cs:~openstack-charmers-next/placement
     num_units: 1
-    constraints: mem=1G
     options:
-      openstack-origin: cloud:bionic-train
+      openstack-origin: *openstack-origin
       debug: "True"
     to:
       - '6'
@@ -90,6 +91,8 @@ applications:
     charm: cs:~openstack-charmers-next/neutron-api
     num_units: 1
     options:
+      manage-neutron-plugin-legacy-mode: true
+      neutron-plugin: ovs
       openstack-origin: *openstack-origin
     to:
       - '8'
@@ -98,8 +101,6 @@ applications:
   heat:
     charm: ../../../heat
     num_units: 2
-    series: bionic
-    constraints: mem=2048
     options:
       openstack-origin: *openstack-origin
       debug: "True"

@@ -37,7 +37,19 @@ class VaultKVContext(context.OSContextGenerator):
         )
 
     def __call__(self):
-        import hvac
+        try:
+            import hvac
+        except ImportError:
+            # BUG: #1862085 - if the relation is made to vault, but the
+            # 'encrypt' option is not made, then the charm errors with an
+            # import warning.  This catches that, logs a warning, and returns
+            # with an empty context.
+            hookenv.log("VaultKVContext: trying to use hvac pythong module "
+                        "but it's not available.  Is secrets-stroage relation "
+                        "made, but encrypt option not set?",
+                        level=hookenv.WARNING)
+            # return an emptry context on hvac import error
+            return {}
         ctxt = {}
         # NOTE(hopem): see https://bugs.launchpad.net/charm-helpers/+bug/1849323
         db = unitdata.kv()
@@ -128,9 +140,16 @@ def vault_relation_complete(backend=None):
     :ptype backend: string
     :returns: whether the relation to vault is complete
     :rtype: bool"""
-    vault_kv = VaultKVContext(secret_backend=backend or VAULTLOCKER_BACKEND)
-    vault_kv()
-    return vault_kv.complete
+    try:
+        import hvac
+    except ImportError:
+        return False
+    try:
+        vault_kv = VaultKVContext(secret_backend=backend or VAULTLOCKER_BACKEND)
+        vault_kv()
+        return vault_kv.complete
+    except hvac.exceptions.InvalidRequest:
+        return False
 
 
 # TODO: contrib a high level unwrap method to hvac that works

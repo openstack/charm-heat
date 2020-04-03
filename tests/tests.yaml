@@ -11,6 +11,8 @@ gate_bundles:
   - bionic-rocky
   - bionic-stein
   - bionic-train
+  - bionic-ussuri
+  - focal-ussuri
 dev_bundles:
   - bionic-train
 configure:
@@ -23,3 +25,5 @@ tests:
 tests_options:
   policyd:
     service: heat
+  force_deploy:
+    - focal-ussuri

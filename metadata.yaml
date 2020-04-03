@@ -11,6 +11,7 @@ series:
   - xenial
   - bionic
   - eoan
+  - focal
   - trusty
 extra-bindings:
   public:
