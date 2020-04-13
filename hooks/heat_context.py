@@ -146,3 +146,9 @@ class InstanceUserContext(context.OSContextGenerator):
             instance_user = config('instance-user')
         ctxt['instance_user'] = instance_user
         return ctxt
+
+
+class QuotaConfigurationContext(context.OSContextGenerator):
+    def __call__(self):
+        ctxt = {"max_stacks_per_tenant": config('max-stacks-per-tenant')}
+        return ctxt

@@ -72,6 +72,12 @@ class TestHeatContext(CharmTestCase):
         self.assertEqual(
             heat_context.HeatIdentityServiceContext()(), final_result)
 
+    def test_quota_configuration_context(self):
+        expected = {'max_stacks_per_tenant': '999'}
+        self.config.side_effect = self.test_config.get
+        self.test_config.set('max-stacks-per-tenant', '999')
+        self.assertEqual(heat_context.QuotaConfigurationContext()(), expected)
+
 
 class HeatPluginContextTest(CharmTestCase):
 

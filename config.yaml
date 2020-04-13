@@ -262,3 +262,8 @@ options:
       override YAML files in the service's policy.d directory.  The resource
       file should be a ZIP file containing at least one yaml file with a .yaml
       or .yml extension.  If False then remove the overrides.
+  max-stacks-per-tenant:
+    type: int
+    default:
+    description: |
+      Maximum number of stacks any one tenant may have active at one time.
