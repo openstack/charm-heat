@@ -6,13 +6,14 @@ description: |
   orchestration engine to launch multiple composite cloud applications based on
   templates in the form of text files that can be treated like code.
 tags:
-  - openstack
+- openstack
 series:
-  - xenial
-  - bionic
-  - eoan
-  - focal
-  - trusty
+- xenial
+- bionic
+- eoan
+- focal
+- trusty
+- groovy
 extra-bindings:
   public:
   admin:
