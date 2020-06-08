@@ -18,7 +18,7 @@ import unittest
 import yaml
 
 from contextlib import contextmanager
-from mock import patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 
 def load_config():
