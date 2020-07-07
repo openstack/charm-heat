@@ -14,7 +14,8 @@ gate_bundles:
   - bionic-ussuri
   - focal-ussuri
 dev_bundles:
-  - bionic-train
+  - focal-victoria
+  - groovy-victoria
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_cirros_image
   - zaza.openstack.charm_tests.nova.setup.manage_ssh_key
@@ -26,4 +27,4 @@ tests_options:
   policyd:
     service: heat
   force_deploy:
-    - focal-ussuri
+    - groovy-victoria
