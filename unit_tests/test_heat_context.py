@@ -15,7 +15,7 @@
 import charmhelpers
 import heat_context
 import json
-from mock import patch
+from unittest.mock import patch
 from test_utils import CharmTestCase
 
 TO_PATCH = [

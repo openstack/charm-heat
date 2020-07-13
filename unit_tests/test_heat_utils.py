@@ -14,7 +14,7 @@
 
 from copy import deepcopy
 from collections import OrderedDict
-from mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, call
 from test_utils import CharmTestCase
 
 from charmhelpers.core import hookenv

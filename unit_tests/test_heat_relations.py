@@ -15,7 +15,7 @@
 import os.path
 import sys
 
-from mock import call, patch, MagicMock
+from unittest.mock import call, patch, MagicMock
 from test_utils import CharmTestCase, patch_open
 
 # python-apt is not installed as part of test-requirements but is imported by
