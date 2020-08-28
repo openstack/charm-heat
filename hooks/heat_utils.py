@@ -97,6 +97,13 @@ PY3_PACKAGES = [
     'python3-memcache',
     'python3-swiftclient',
     'python3-six',
+
+    # NOTE(lourot): these dependencies are declared as "recommended" on the
+    # heat-engine package but starting from focal-victoria they are actually
+    # hard dependencies. Until this is fixed we need this workaround. See
+    # lp:1893935
+    'python3-vitrageclient',
+    'python3-zunclient',
 ]
 
 VERSION_PACKAGE = 'heat-common'
