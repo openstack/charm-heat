@@ -200,7 +200,7 @@ def upgrade_charm():
             except subprocess.CalledProcessError as e:
                 log("upgrade: leader_set: heat-auth-encryption-key failed,"
                     " didn't delete the existing file: {}.\n"
-                    "Error was: ".format(encryption_path, str(e)),
+                    "Error was: {}".format(encryption_path, str(e)),
                     level=WARNING)
             else:
                 # now we just delete the file
