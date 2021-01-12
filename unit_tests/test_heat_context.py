@@ -119,7 +119,6 @@ class HeatPluginContextTest(CharmTestCase):
             {},
             {
                 'plugin_dirs': '/usr/lib64/heat,/usr/lib/heat',
-                'sections': {},
             }
         )
 
@@ -128,7 +127,6 @@ class HeatPluginContextTest(CharmTestCase):
             {'plugin-dirs': '/usr/lib64/heat,/usr/lib/heat,/usr/local/lib'},
             {
                 'plugin_dirs': '/usr/lib64/heat,/usr/lib/heat,/usr/local/lib',
-                'sections': {},
             }
         )
 
