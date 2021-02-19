@@ -2,19 +2,20 @@ charm_name: heat
 smoke_bundles:
   - bionic-train
 gate_bundles:
-  - trusty-mitaka
   - xenial-mitaka
-  - xenial-ocata
-  - xenial-pike
-  - xenial-queens
   - bionic-queens
-  - bionic-rocky
   - bionic-stein
   - bionic-train
   - bionic-ussuri
   - focal-ussuri
   - focal-victoria
   - groovy-victoria
+dev_bundles:
+  - trusty-mtaka
+  - xenial-ocata
+  - xenial-pike
+  - xenial-queens
+  - bionic-rocky
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_cirros_image
   - zaza.openstack.charm_tests.nova.setup.manage_ssh_key
