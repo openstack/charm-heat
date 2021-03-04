@@ -1,6 +1,8 @@
 charm_name: heat
+
 smoke_bundles:
-  - bionic-train
+  - focal-ussuri
+
 gate_bundles:
   - xenial-mitaka
   - bionic-queens
@@ -9,22 +11,28 @@ gate_bundles:
   - bionic-ussuri
   - focal-ussuri
   - focal-victoria
+  - focal-wallaby
   - groovy-victoria
+
 dev_bundles:
   - trusty-mtaka
   - xenial-ocata
   - xenial-pike
   - xenial-queens
   - bionic-rocky
+  - hirsute-wallaby
+
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_cirros_image
   - zaza.openstack.charm_tests.nova.setup.manage_ssh_key
   - zaza.openstack.charm_tests.nova.setup.create_flavors
+
 tests:
   - zaza.openstack.charm_tests.heat.tests.HeatBasicDeployment
   - zaza.openstack.charm_tests.policyd.tests.HeatTests
+
 tests_options:
   policyd:
     service: heat
   force_deploy:
-    - groovy-victoria
+    - hirsute-wallaby
