@@ -226,14 +226,18 @@ class HeatRelationTests(CharmTestCase):
         self.relation_set.assert_called_with(
             username='heat',
             vhost='openstack',
-            relation_id=None)
+            relation_id=None,
+            ttlname='heat_expiry',
+            ttlreg='heat-engine-listener|engine_worker',
+            ttl=3600000)
 
     def test_amqp_joined_passes_relation_id(self):
         "Ensures relation_id correct passed to relation_set"
         relations.amqp_joined(relation_id='heat:1')
-        self.relation_set.assert_called_with(username='heat',
-                                             vhost='openstack',
-                                             relation_id='heat:1')
+        self.relation_set.assert_called_with(
+            username='heat', vhost='openstack', relation_id='heat:1',
+            ttlname='heat_expiry',
+            ttlreg='heat-engine-listener|engine_worker', ttl=3600000)
 
     @patch.object(relations, 'CONFIGS')
     def test_amqp_changed_relation_data(self, configs):

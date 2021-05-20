@@ -74,6 +74,12 @@ options:
     default: openstack
     type: string
     description: RabbitMQ virtual host to request access on rabbitmq-server.
+  ttl:
+    type: int
+    default: 3600000
+    description: |
+      TTL in MS for heat queues in the openstack vhost. Defaults to
+      1 hour, but can be tuned up or down depending on deployment requirements.
   encryption-key:
     default: ""
     type: string

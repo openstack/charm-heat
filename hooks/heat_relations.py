@@ -171,6 +171,8 @@ def config_changed():
         cluster_joined(relation_id=rid)
     for r_id in relation_ids('ha'):
         ha_joined(relation_id=r_id)
+    for rid in relation_ids('amqp'):
+        amqp_joined(relation_id=rid)
 
     # call the policy overrides handler which will install any policy overrides
     policyd.maybe_do_policyd_overrides_on_config_changed(
@@ -221,7 +223,10 @@ def upgrade_charm():
 @hooks.hook('amqp-relation-joined')
 def amqp_joined(relation_id=None):
     relation_set(relation_id=relation_id,
-                 username=config('rabbit-user'), vhost=config('rabbit-vhost'))
+                 username=config('rabbit-user'), vhost=config('rabbit-vhost'),
+                 ttlname='heat_expiry',
+                 ttlreg='heat-engine-listener|engine_worker',
+                 ttl=config('ttl'))
 
 
 @hooks.hook('amqp-relation-changed')
