@@ -13,6 +13,7 @@ series:
 - focal
 - groovy
 - hirsute
+- impish
 extra-bindings:
   public:
   admin:
