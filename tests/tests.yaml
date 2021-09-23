@@ -12,6 +12,7 @@ gate_bundles:
   - focal-ussuri
   - focal-victoria
   - focal-wallaby
+  - focal-xena
   - groovy-victoria
 
 dev_bundles:
@@ -21,6 +22,7 @@ dev_bundles:
   - xenial-queens
   - bionic-rocky
   - hirsute-wallaby
+  - impish-xena
 
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_cirros_image
@@ -35,4 +37,5 @@ tests_options:
   policyd:
     service: heat
   force_deploy:
-    - hirsute-wallaby
+    - groovy-victoria
+    - impish-xena

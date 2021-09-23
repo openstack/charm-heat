@@ -2,3 +2,9 @@
     templates:
       - charm-unit-jobs
       - charm-functional-jobs
+    check:
+      jobs:
+        - focal-xena:
+            voting: false
+        - impish-xena:
+            voting: false
