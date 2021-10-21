@@ -30,22 +30,16 @@ applications:
 
   heat-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
   nova-cloud-controller-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
   placement-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
   keystone-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
   glance-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
   neutron-api-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
 
   mysql-innodb-cluster:
     charm: cs:~openstack-charmers/mysql-innodb-cluster
@@ -56,7 +50,6 @@ applications:
       - '0'
       - '1'
       - '2'
-    channel: candidate
 
   keystone:
     charm: cs:~openstack-charmers/keystone
@@ -65,7 +58,6 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '3'
-    channel: candidate
 
   rabbitmq-server:
     charm: cs:~openstack-charmers/rabbitmq-server
@@ -74,7 +66,6 @@ applications:
       source: *openstack-origin
     to:
       - '4'
-    channel: candidate
 
   glance:
     charm: cs:~openstack-charmers/glance
@@ -83,7 +74,6 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '5'
-    channel: candidate
 
   nova-cloud-controller:
     charm: cs:~openstack-charmers/nova-cloud-controller
@@ -94,7 +84,6 @@ applications:
       network-manager: Neutron
     to:
       - '6'
-    channel: candidate
 
   nova-compute:
     charm: cs:~openstack-charmers/nova-compute
@@ -105,7 +94,6 @@ applications:
       enable-live-migration: "False"
     to:
       - '7'
-    channel: candidate
 
   placement:
     charm: cs:~openstack-charmers/placement
@@ -115,7 +103,6 @@ applications:
       debug: "True"
     to:
       - '8'
-    channel: candidate
 
   neutron-gateway:
     charm: cs:~openstack-charmers/neutron-gateway
@@ -124,7 +111,6 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '9'
-    channel: candidate
 
   neutron-api:
     charm: cs:~openstack-charmers/neutron-api
@@ -135,11 +121,9 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '10'
-    channel: candidate
 
   neutron-openvswitch:
     charm: cs:~openstack-charmers/neutron-openvswitch
-    channel: candidate
 
   heat:
     charm: ../../../heat

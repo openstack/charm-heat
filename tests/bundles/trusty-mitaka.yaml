@@ -34,7 +34,6 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '1'
-    channel: candidate
   rabbitmq-server:
     charm: cs:~openstack-charmers/rabbitmq-server
     num_units: 1
@@ -42,7 +41,6 @@ applications:
       source: *openstack-origin
     to:
       - '2'
-    channel: candidate
   glance:
     charm: cs:~openstack-charmers/glance
     num_units: 1
@@ -50,7 +48,6 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '3'
-    channel: candidate
   nova-cloud-controller:
     charm: cs:~openstack-charmers/nova-cloud-controller
     num_units: 1
@@ -59,7 +56,6 @@ applications:
       api-rate-limit-rules: "( POST, '*', .*, 9999, MINUTE );"
     to:
       - '4'
-    channel: candidate
   nova-compute:
     charm: cs:~openstack-charmers/nova-compute
     num_units: 1
@@ -69,7 +65,6 @@ applications:
       enable-live-migration: "False"
     to:
       - '5'
-    channel: candidate
   heat:
     charm: ../../../heat
     num_units: 2
