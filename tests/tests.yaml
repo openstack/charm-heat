@@ -4,25 +4,26 @@ smoke_bundles:
   - focal-ussuri
 
 gate_bundles:
-  - xenial-mitaka
   - bionic-queens
   - bionic-stein
-  - bionic-train
   - bionic-ussuri
   - focal-ussuri
   - focal-victoria
   - focal-wallaby
   - focal-xena
-  - groovy-victoria
+  - hirsute-wallaby
+  - impish-xena
 
 dev_bundles:
-  - trusty-mtaka
+  - trusty-mitaka
+  - xenial-mitaka
   - xenial-ocata
   - xenial-pike
   - xenial-queens
   - bionic-rocky
-  - hirsute-wallaby
-  - impish-xena
+  - bionic-train
+  - focal-yoga
+  - jammy-yoga
 
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_cirros_image
@@ -37,5 +38,6 @@ tests_options:
   policyd:
     service: heat
   force_deploy:
-    - groovy-victoria
+    - hirsute-wallaby
     - impish-xena
+    - jammy-yoga

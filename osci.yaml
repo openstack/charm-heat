@@ -4,7 +4,10 @@
       - charm-functional-jobs
     check:
       jobs:
-        - focal-xena:
+        - focal-xena
+        - focal-yoga:
             voting: false
         - impish-xena:
+            voting: false
+        - jammy-yoga:
             voting: false
