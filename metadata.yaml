@@ -14,7 +14,6 @@ series:
 - groovy
 - hirsute
 - impish
-- jammy
 extra-bindings:
   public:
   admin:
