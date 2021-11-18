@@ -15,11 +15,6 @@ gate_bundles:
   - impish-xena
 
 dev_bundles:
-  - trusty-mitaka
-  - xenial-mitaka
-  - xenial-ocata
-  - xenial-pike
-  - xenial-queens
   - bionic-rocky
   - bionic-train
   - focal-yoga
