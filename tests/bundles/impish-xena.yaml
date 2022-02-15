@@ -65,7 +65,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '3'
-    channel: latest/edge
+    channel: yoga/edge
 
   rabbitmq-server:
     charm: ch:rabbitmq-server
@@ -83,7 +83,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '5'
-    channel: latest/edge
+    channel: yoga/edge
 
   nova-cloud-controller:
     charm: ch:nova-cloud-controller
@@ -94,7 +94,7 @@ applications:
       network-manager: Neutron
     to:
       - '6'
-    channel: latest/edge
+    channel: yoga/edge
 
   nova-compute:
     charm: ch:nova-compute
@@ -105,7 +105,7 @@ applications:
       enable-live-migration: "False"
     to:
       - '7'
-    channel: latest/edge
+    channel: yoga/edge
 
   placement:
     charm: ch:placement
@@ -115,7 +115,7 @@ applications:
       debug: "True"
     to:
       - '8'
-    channel: latest/edge
+    channel: yoga/edge
 
   neutron-gateway:
     charm: ch:neutron-gateway
@@ -124,7 +124,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '9'
-    channel: latest/edge
+    channel: yoga/edge
 
   neutron-api:
     charm: ch:neutron-api
@@ -135,14 +135,14 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '10'
-    channel: latest/edge
+    channel: yoga/edge
 
   neutron-openvswitch:
     charm: ch:neutron-openvswitch
-    channel: latest/edge
+    channel: yoga/edge
 
   heat:
-    charm: ../../../heat
+    charm: ../../heat.charm
     num_units: 2
     constraints: mem=2048
     options:
