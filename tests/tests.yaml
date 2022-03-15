@@ -1,27 +1,14 @@
 charm_name: heat
 
 smoke_bundles:
-  - focal-ussuri
+  - focal-xena
 
 gate_bundles:
-  - xenial-mitaka
-  - bionic-queens
-  - bionic-stein
-  - bionic-train
-  - bionic-ussuri
-  - focal-ussuri
-  - focal-victoria
   - focal-wallaby
   - focal-xena
-  - groovy-victoria
 
 dev_bundles:
   - trusty-mtaka
-  - xenial-ocata
-  - xenial-pike
-  - xenial-queens
-  - bionic-rocky
-  - hirsute-wallaby
   - impish-xena
 
 configure:
@@ -37,5 +24,4 @@ tests_options:
   policyd:
     service: heat
   force_deploy:
-    - groovy-victoria
     - impish-xena
