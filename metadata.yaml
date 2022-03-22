@@ -9,7 +9,6 @@ tags:
 - openstack
 series:
 - focal
-- impish
 extra-bindings:
   public:
   admin:
