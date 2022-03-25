@@ -10,6 +10,7 @@ include:
     - contrib.python
     - contrib.storage
     - contrib.network.ip
+    - contrib.hardware.pci
     - contrib.hahelpers:
         - apache
         - cluster
