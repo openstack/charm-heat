@@ -14,3 +14,4 @@ func-results.json
 __pycache__
 .stestr/
 tests/cirros*
+*.charm
