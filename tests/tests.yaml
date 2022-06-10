@@ -1,15 +1,15 @@
 charm_name: heat
 
 smoke_bundles:
-  - focal-xena
+  - jammy-yoga
 
 gate_bundles:
-  - focal-xena
-  - impish-xena
+  - jammy-yoga
 
 dev_bundles:
-  - focal-yoga
   - jammy-yoga
+  - jammy-zed
+  - kinetic-zed
 
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_cirros_image
@@ -24,5 +24,4 @@ tests_options:
   policyd:
     service: heat
   force_deploy:
-    - impish-xena
-    - jammy-yoga
+    - kinetic-zed

@@ -1,7 +1,7 @@
 variables:
-  openstack-origin: &openstack-origin cloud:focal-xena
+  openstack-origin: &openstack-origin distro
 
-series: &series focal
+series: &series kinetic
 
 machines:
   0:
@@ -65,7 +65,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '3'
-    channel: yoga/edge
+    channel: latest/edge
 
   rabbitmq-server:
     charm: ch:rabbitmq-server
@@ -83,7 +83,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '5'
-    channel: yoga/edge
+    channel: latest/edge
 
   nova-cloud-controller:
     charm: ch:nova-cloud-controller
@@ -94,7 +94,7 @@ applications:
       network-manager: Neutron
     to:
       - '6'
-    channel: yoga/edge
+    channel: latest/edge
 
   nova-compute:
     charm: ch:nova-compute
@@ -105,7 +105,7 @@ applications:
       enable-live-migration: "False"
     to:
       - '7'
-    channel: yoga/edge
+    channel: latest/edge
 
   placement:
     charm: ch:placement
@@ -115,7 +115,7 @@ applications:
       debug: "True"
     to:
       - '8'
-    channel: yoga/edge
+    channel: latest/edge
 
   neutron-gateway:
     charm: ch:neutron-gateway
@@ -124,7 +124,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '9'
-    channel: yoga/edge
+    channel: latest/edge
 
   neutron-api:
     charm: ch:neutron-api
@@ -135,11 +135,11 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '10'
-    channel: yoga/edge
+    channel: latest/edge
 
   neutron-openvswitch:
     charm: ch:neutron-openvswitch
-    channel: yoga/edge
+    channel: latest/edge
 
   heat:
     charm: ../../heat.charm
