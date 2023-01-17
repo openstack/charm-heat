@@ -70,8 +70,6 @@ applications:
   rabbitmq-server:
     charm: ch:rabbitmq-server
     num_units: 1
-    options:
-      source: *openstack-origin
     to:
       - '4'
     channel: latest/edge
