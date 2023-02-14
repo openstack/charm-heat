@@ -1,15 +1,15 @@
 charm_name: heat
 
 smoke_bundles:
-  - jammy-yoga
+  - jammy-zed
 
 gate_bundles:
-  - jammy-yoga
+  - jammy-zed
 
 dev_bundles:
-  - jammy-yoga
-  - jammy-zed
+  - jammy-antelope
   - kinetic-zed
+  - lunar-antelope
 
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_cirros_image
@@ -25,3 +25,4 @@ tests_options:
     service: heat
   force_deploy:
     - kinetic-zed
+    - lunar-antelope
