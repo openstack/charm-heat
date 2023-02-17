@@ -23,6 +23,7 @@ from charmhelpers.core.hookenv import (
 from charmhelpers.contrib.hahelpers.cluster import (
     determine_apache_port,
     determine_api_port,
+    https,
 )
 
 HEAT_PATH = '/var/lib/heat/'
@@ -89,12 +90,24 @@ class HeatHAProxyContext(context.OSContextGenerator):
         apache_cfn_port = determine_apache_port(haproxy_cfn_port,
                                                 singlenode_mode=True)
 
+        healthcheck = [{
+            'option': 'httpchk GET /healthcheck',
+            'http-check': 'expect status 200',
+        }]
+
+        backend_options = {
+            'heat_api': healthcheck,
+            'heat_cfn_api': healthcheck
+        }
+
         ctxt = {
             'service_ports': {'heat_api': [haproxy_port, apache_port],
                               'heat_cfn_api': [haproxy_cfn_port,
                                                apache_cfn_port]},
             'api_listen_port': api_port,
             'api_cfn_listen_port': api_cfn_port,
+            'backend_options': backend_options,
+            'https': https(),
         }
         return ctxt
 

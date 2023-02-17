@@ -78,6 +78,38 @@ class TestHeatContext(CharmTestCase):
         self.test_config.set('max-stacks-per-tenant', '999')
         self.assertEqual(heat_context.QuotaConfigurationContext()(), expected)
 
+    @patch('charmhelpers.contrib.hahelpers.cluster.https')
+    @patch('heat_context.https')
+    def test_haproxy_context(self, mock_https, mock_ch_https):
+        for https_mode in [False, True]:
+            api_cfn_listen_port = 7990
+            api_listen_port = 7994
+            if https_mode:
+                api_cfn_listen_port = 7980
+                api_listen_port = 7984
+            mock_https.return_value = https_mode
+            mock_ch_https.return_value = https_mode
+            haproxy_context = heat_context.HeatHAProxyContext()
+            healthcheck = [{
+                'option': 'httpchk GET /healthcheck',
+                'http-check': 'expect status 200',
+            }]
+            backend_options = {
+                'heat_api': healthcheck,
+                'heat_cfn_api': healthcheck
+            }
+            expected = {
+                'service_ports': {
+                    'heat_api': [8004, 7994],
+                    'heat_cfn_api': [8000, 7990]
+                },
+                'api_listen_port': api_listen_port,
+                'api_cfn_listen_port': api_cfn_listen_port,
+                'backend_options': backend_options,
+                'https': https_mode,
+            }
+            self.assertEqual(expected, haproxy_context())
+
 
 class HeatPluginContextTest(CharmTestCase):
 
