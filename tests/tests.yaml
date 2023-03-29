@@ -8,7 +8,6 @@ gate_bundles:
 
 dev_bundles:
   - jammy-antelope
-  - kinetic-zed
   - lunar-antelope
 
 configure:
@@ -24,5 +23,4 @@ tests_options:
   policyd:
     service: heat
   force_deploy:
-    - kinetic-zed
     - lunar-antelope
