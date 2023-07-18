@@ -9,8 +9,8 @@ tags:
 - openstack
 series:
 - jammy
-- kinetic
 - lunar
+- mantic
 extra-bindings:
   public:
   admin:
