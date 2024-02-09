@@ -1,7 +1,7 @@
 variables:
-  openstack-origin: &openstack-origin distro
+  openstack-origin: &openstack-origin cloud:jammy-caracal
 
-series: &series lunar
+series: &series jammy
 
 machines:
   0:
@@ -65,7 +65,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '3'
-    channel: latest/edge
+    channel: 2024.1/edge
 
   rabbitmq-server:
     charm: ch:rabbitmq-server
@@ -81,7 +81,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '5'
-    channel: latest/edge
+    channel: 2024.1/edge
 
   nova-cloud-controller:
     charm: ch:nova-cloud-controller
@@ -92,7 +92,7 @@ applications:
       network-manager: Neutron
     to:
       - '6'
-    channel: latest/edge
+    channel: 2024.1/edge
 
   nova-compute:
     charm: ch:nova-compute
@@ -103,7 +103,7 @@ applications:
       enable-live-migration: "False"
     to:
       - '7'
-    channel: latest/edge
+    channel: 2024.1/edge
 
   placement:
     charm: ch:placement
@@ -113,7 +113,7 @@ applications:
       debug: "True"
     to:
       - '8'
-    channel: latest/edge
+    channel: 2024.1/edge
 
   neutron-gateway:
     charm: ch:neutron-gateway
@@ -122,7 +122,7 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '9'
-    channel: latest/edge
+    channel: 2024.1/edge
 
   neutron-api:
     charm: ch:neutron-api
@@ -133,11 +133,11 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '10'
-    channel: latest/edge
+    channel: 2024.1/edge
 
   neutron-openvswitch:
     charm: ch:neutron-openvswitch
-    channel: latest/edge
+    channel: 2024.1/edge
 
   heat:
     charm: ../../heat.charm

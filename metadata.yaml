@@ -6,11 +6,9 @@ description: |
   orchestration engine to launch multiple composite cloud applications based on
   templates in the form of text files that can be treated like code.
 tags:
-- openstack
+  - openstack
 series:
-- jammy
-- lunar
-- mantic
+  - jammy
 extra-bindings:
   public:
   admin:
