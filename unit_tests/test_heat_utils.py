@@ -50,6 +50,7 @@ RESTART_MAP = OrderedDict([
     ('/etc/heat/heat.conf', ['heat-api', 'heat-api-cfn', 'heat-engine']),
     ('/etc/heat/api-paste.ini', ['heat-api', 'heat-api-cfn']),
     ('/etc/haproxy/haproxy.cfg', ['haproxy']),
+    ('/etc/heat/api_audit_map.conf', ['heat-api']),
     ('/etc/apache2/sites-available/openstack_https_frontend', ['apache2']),
     ('/etc/apache2/sites-available/openstack_https_frontend.conf',
      ['apache2']),
@@ -112,6 +113,7 @@ class HeatUtilsTests(CharmTestCase):
         _restart_map.pop(
             "/etc/apache2/sites-available/openstack_https_frontend.conf")
         _restart_map.pop("/etc/memcached.conf")
+        _restart_map.pop("/etc/heat/api_audit_map.conf")
         self.assertEqual(_restart_map, utils.restart_map())
 
         # Mitaka
@@ -121,6 +123,7 @@ class HeatUtilsTests(CharmTestCase):
         _restart_map = deepcopy(RESTART_MAP)
         _restart_map.pop(
             "/etc/apache2/sites-available/openstack_https_frontend")
+        _restart_map.pop("/etc/heat/api_audit_map.conf")
         self.assertEqual(_restart_map, utils.restart_map())
 
     def test_openstack_upgrade(self):
