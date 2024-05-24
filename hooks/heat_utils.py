@@ -120,6 +120,7 @@ SVC = 'heat'
 HEAT_DIR = '/etc/heat'
 HEAT_CONF = '/etc/heat/heat.conf'
 HEAT_API_PASTE = '/etc/heat/api-paste.ini'
+HEAT_AUDIT_CONF = '%s/api_audit_map.conf' % HEAT_DIR
 HAPROXY_CONF = '/etc/haproxy/haproxy.cfg'
 APACHE_PORTS_CONF = '/etc/apache2/ports.conf'
 HTTPS_APACHE_CONF = '/etc/apache2/sites-available/openstack_https_frontend'
@@ -147,16 +148,22 @@ CONFIG_FILES = OrderedDict([
                      context.WorkerConfigContext(),
                      context.BindHostContext(),
                      context.MemcacheContext(),
-                     context.OSConfigFlagContext()],
+                     context.OSConfigFlagContext(),
+                     context.KeystoneAuditMiddleware(service=SVC)]
     }),
     (HEAT_API_PASTE, {
         'services': [s for s in BASE_SERVICES if 'api' in s],
-        'contexts': [HeatIdentityServiceContext()],
+        'contexts': [HeatIdentityServiceContext(),
+                     context.KeystoneAuditMiddleware(service=SVC)],
     }),
     (HAPROXY_CONF, {
         'contexts': [context.HAProxyContext(singlenode_mode=True),
                      HeatHAProxyContext()],
         'services': ['haproxy'],
+    }),
+    (HEAT_AUDIT_CONF, {
+        'contexts': [context.KeystoneAuditMiddleware(service=SVC)],
+        'services': ['heat-api']
     }),
     (HTTPS_APACHE_CONF, {
         'contexts': [HeatApacheSSLContext()],
