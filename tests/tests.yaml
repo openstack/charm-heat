@@ -18,9 +18,13 @@ configure:
 tests:
   - zaza.openstack.charm_tests.heat.tests.HeatBasicDeployment
   - zaza.openstack.charm_tests.policyd.tests.HeatTests
+  - zaza.openstack.charm_tests.audit.tests.KeystoneAuditMiddlewareTest
 
 tests_options:
   policyd:
     service: heat
+  audit-middleware:
+    service: heat
+
   force_deploy:
     - lunar-antelope
