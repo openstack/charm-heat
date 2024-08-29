@@ -7,8 +7,6 @@ description: |
   templates in the form of text files that can be treated like code.
 tags:
   - openstack
-series:
-  - jammy
 extra-bindings:
   public:
   admin:
