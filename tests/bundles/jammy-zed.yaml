@@ -138,7 +138,7 @@ applications:
     channel: zed/edge
 
   heat:
-    charm: ../../heat.charm
+    charm: ../../charm-heat_ubuntu@22.04-amd64.charm
     num_units: 2
     constraints: mem=2048
     options:
