@@ -140,7 +140,7 @@ applications:
     channel: 2024.1/edge
 
   heat:
-    charm: ../../heat.charm
+    charm: ../../heat_ubuntu@24.04-amd64.charm
     num_units: 2
     constraints: mem=2048
     options:
