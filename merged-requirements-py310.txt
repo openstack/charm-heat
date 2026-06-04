@@ -6,7 +6,7 @@
 #
 aiohappyeyeballs==2.6.2
     # via aiohttp
-aiohttp==3.13.5
+aiohttp==3.14.0
     # via
     #   python-libmaas
     #   zaza
@@ -43,9 +43,9 @@ bcrypt==5.0.0
     # via paramiko
 blessings==1.7
     # via charm-tools
-boto3==1.43.17
+boto3==1.43.22
     # via zaza-openstack
-botocore==1.43.17
+botocore==1.43.22
     # via
     #   boto3
     #   s3transfer
@@ -79,7 +79,6 @@ cliff==2.18.0
     #   python-openstackclient
     #   python-watcherclient
     #   stestr
-    #   tempest
 cmd2==0.8.9
     # via cliff
 colander==1.8.3
@@ -98,7 +97,6 @@ cryptography==3.3.2
     #   pyopenssl
     #   python-magnumclient
     #   secretstorage
-    #   tempest
     #   trustme
     #   zaza
     #   zaza-openstack
@@ -113,18 +111,15 @@ debtcollector==3.1.0
     #   python-keystoneclient
     #   python-manilaclient
     #   python-neutronclient
-    #   tempest
 decorator==5.3.1
     # via
     #   dogpile-cache
     #   jsonpath-rw
     #   openstacksdk
     #   python-magnumclient
-defusedxml==0.7.1
-    # via tempest
 dict2colander==0.2
     # via charm-tools
-distlib==0.4.0
+distlib==0.4.1
     # via virtualenv
 dnspython==2.8.0
     # via
@@ -136,15 +131,11 @@ dogpile-cache==1.5.0
     #   openstacksdk
     #   python-ironicclient
 fasteners==0.20
-    # via
-    #   oslo-concurrency
-    #   tempest
-filelock==3.29.0
+    # via oslo-concurrency
+filelock==3.29.1
     # via virtualenv
 fixtures==4.3.2
-    # via
-    #   stestr
-    #   tempest
+    # via stestr
 flake8==7.1.1
     # via -r test-requirements.in
 frozenlist==1.8.0
@@ -164,7 +155,7 @@ hvac==0.6.4
     #   juju
     #   zaza
     #   zaza-openstack
-idna==3.17
+idna==3.18
     # via
     #   requests
     #   trustme
@@ -216,7 +207,6 @@ jsonschema==4.17.3
     #   charm-tools
     #   python-designateclient
     #   python-ironicclient
-    #   tempest
     #   warlock
 juju-wait==2.8.4
     # via zaza
@@ -273,7 +263,6 @@ netaddr==0.7.20
     #   oslo-utils
     #   osprofiler
     #   python-neutronclient
-    #   tempest
 netifaces==0.11.0
     # via
     #   -r requirements.in
@@ -314,9 +303,7 @@ osc-lib==2.1.0
     #   python-watcherclient
     #   zaza-openstack
 oslo-concurrency==7.5.0
-    # via
-    #   osprofiler
-    #   tempest
+    # via osprofiler
 oslo-config==6.11.3
     # via
     #   oslo-concurrency
@@ -324,7 +311,6 @@ oslo-config==6.11.3
     #   osprofiler
     #   python-keystoneclient
     #   python-manilaclient
-    #   tempest
     #   zaza
     #   zaza-openstack
 oslo-context==6.4.0
@@ -354,7 +340,6 @@ oslo-log==8.2.0
     #   python-magnumclient
     #   python-manilaclient
     #   python-neutronclient
-    #   tempest
 oslo-serialization==5.10.0
     # via
     #   aodhclient
@@ -371,7 +356,6 @@ oslo-serialization==5.10.0
     #   python-novaclient
     #   python-octaviaclient
     #   python-watcherclient
-    #   tempest
 oslo-utils==7.1.0
     # via
     #   aodhclient
@@ -396,7 +380,6 @@ oslo-utils==7.1.0
     #   python-octaviaclient
     #   python-openstackclient
     #   python-watcherclient
-    #   tempest
 osprofiler==4.4.0
     # via aodhclient
 otherstuf==1.1.0
@@ -406,9 +389,7 @@ packaging==26.2
     #   juju
     #   oslo-utils
 paramiko==5.0.0
-    # via
-    #   juju
-    #   tempest
+    # via juju
 parse==1.22.1
     # via stuf
 path==16.16.0
@@ -447,10 +428,9 @@ pbr==5.6.0
     #   python-octaviaclient
     #   python-openstackclient
     #   python-watcherclient
-    #   tempest
 pika==1.4.1
     # via zaza-openstack
-pip==26.1.1
+pip==26.1.2
     # via charm-tools
 platformdirs==4.10.0
     # via
@@ -471,7 +451,6 @@ prettytable==0.7.2
     #   python-magnumclient
     #   python-manilaclient
     #   python-novaclient
-    #   tempest
 propcache==0.5.2
     # via
     #   aiohttp
@@ -573,9 +552,7 @@ python-octaviaclient==1.10.1
 python-openstackclient==4.0.2
     # via python-octaviaclient
 python-subunit==1.4.6
-    # via
-    #   stestr
-    #   tempest
+    # via stestr
 python-swiftclient==3.8.1
     # via
     #   python-heatclient
@@ -606,7 +583,6 @@ pyyaml==6.0.3
     #   python-subunit
     #   python-watcherclient
     #   stestr
-    #   tempest
     #   zaza
     #   zaza-openstack
 requests==2.34.2
@@ -694,9 +670,7 @@ six==1.17.0
     #   python-openstackclient
     #   python-swiftclient
 stestr==4.2.1
-    # via
-    #   -r test-requirements.in
-    #   tempest
+    # via -r test-requirements.in
 stevedore==5.8.0
     # via
     #   cliff
@@ -709,24 +683,18 @@ stevedore==5.8.0
     #   python-ironicclient
     #   python-keystoneclient
     #   python-magnumclient
-    #   tempest
 stuf==0.9.16
     # via otherstuf
-tempest @ git+https://opendev.org/openstack/tempest.git
-    # via -r test-requirements.in
 tenacity==9.1.4
     # via
     #   zaza
     #   zaza-openstack
 terminaltables==3.1.10
     # via python-libmaas
-testscenarios==0.6.2
-    # via tempest
 testtools==2.9.1
     # via
     #   python-subunit
     #   stestr
-    #   tempest
 tomlkit==0.15.0
     # via stestr
 toposort==1.10
@@ -739,6 +707,7 @@ types-setuptools==82.0.0.20260518
     # via requirements-parser
 typing-extensions==4.15.0
     # via
+    #   aiohttp
     #   aiosignal
     #   dogpile-cache
     #   juju
@@ -759,7 +728,6 @@ urllib3==2.7.0
     #   botocore
     #   kubernetes
     #   requests
-    #   tempest
 virtualenv==20.39.1
     # via charm-tools
 voluptuous==0.16.0
@@ -768,7 +736,7 @@ warlock==2.1.0
     # via python-glanceclient
 wcwidth==0.7.0
     # via cmd2
-webob==1.8.9
+webob==1.8.10
     # via osprofiler
 websocket-client==1.9.0
     # via kubernetes
